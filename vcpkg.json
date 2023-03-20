@@ -1,7 +1,7 @@
 {
-	"name": "file-formats",
+	"name": "file-formats-cpp",
 	"version": "1.0",
 	"dependencies": [
-        
+		"hdf5"
 	]
 }
