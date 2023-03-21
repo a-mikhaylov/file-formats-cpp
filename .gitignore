@@ -13,5 +13,7 @@ _deps
 build/
 
 .vscode
-
+# bin files for write/read
 _data/
+# some examples of realization
+examples/
