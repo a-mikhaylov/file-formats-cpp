@@ -24,12 +24,12 @@ arrow::Result<std::shared_ptr<arrow::Table>> CreateTable() {
     // This code should look familiar from the basic Arrow example, and is not the
     // focus of this example. However, we need data to work on it, and this makes that!
     auto schema =
-        arrow::schema({arrow::field("a", arrow::int64()), arrow::field("b", arrow::int64()),
-                       arrow::field("c", arrow::int64())});
+        arrow::schema({arrow::field("a", arrow::int32()), arrow::field("b", arrow::int32()),
+                       arrow::field("c", arrow::int32())});
     std::shared_ptr<arrow::Array> array_a;
     std::shared_ptr<arrow::Array> array_b;
     std::shared_ptr<arrow::Array> array_c;
-    arrow::NumericBuilder<arrow::Int64Type> builder;
+    arrow::NumericBuilder<arrow::Int32Type> builder;
     ARROW_RETURN_NOT_OK(builder.AppendValues({0, 1, 2, 3, 4, 5, 6, 7, 8, 9}));
     ARROW_RETURN_NOT_OK(builder.Finish(&array_a));
     builder.Reset();
@@ -40,7 +40,6 @@ arrow::Result<std::shared_ptr<arrow::Table>> CreateTable() {
     ARROW_RETURN_NOT_OK(builder.Finish(&array_c));
     return arrow::Table::Make(schema, {array_a, array_b, array_c});
 }
-
 
 // Set up a dataset by writing two Parquet files.
 arrow::Result<std::string> CreateExampleParquetDataset(
@@ -209,6 +208,8 @@ arrow::Status RunMain_Base() {
 
 arrow::Status RunMain() {
     ARROW_RETURN_NOT_OK(PrepareEnv());
+
+    //Preparing a FileSystem Object
     std::shared_ptr<arrow::fs::FileSystem> fs;
 
     char init_path[256];
@@ -218,6 +219,8 @@ arrow::Status RunMain() {
     }
     ARROW_ASSIGN_OR_RAISE(fs, arrow::fs::FileSystemFromUriOrPath(init_path));
     
+    //Creating a FileSystemDatasetFactory
+
     // A file selector lets us actually traverse a multi-file dataset
     arrow::fs::FileSelector selector;
     selector.base_dir = "parquet_dataset";
@@ -231,8 +234,8 @@ arrow::Status RunMain() {
     ARROW_ASSIGN_OR_RAISE(auto factory, arrow::dataset::FileSystemDatasetFactory::Make(
                                           fs, selector, read_format, options));
 
+    //Build Dataset using Factory
     ARROW_ASSIGN_OR_RAISE(std::shared_ptr<arrow::dataset::Dataset> read_dataset, factory->Finish());
-
     ARROW_ASSIGN_OR_RAISE(arrow::dataset::FragmentIterator fragments, read_dataset->GetFragments());
     for (const auto& fragment : fragments) {
         std::cout << "Found fragment: " << (*fragment)->ToString() << std::endl;
@@ -240,9 +243,56 @@ arrow::Status RunMain() {
                 << (*fragment)->partition_expression().ToString() << std::endl;
     }
 
+    //Move Dataset into Table
     ARROW_ASSIGN_OR_RAISE(std::shared_ptr<arrow::dataset::ScannerBuilder> read_scan_builder, read_dataset->NewScan());
     ARROW_ASSIGN_OR_RAISE(std::shared_ptr<arrow::dataset::Scanner> read_scanner, read_scan_builder->Finish());
 
+    ARROW_ASSIGN_OR_RAISE(std::shared_ptr<arrow::Table> table, read_scanner->ToTable());
+    std::cerr << table->ToString();
+
+    //Prepare Data from Table for Writing
+    std::shared_ptr<arrow::TableBatchReader> write_dataset = std::make_shared<arrow::TableBatchReader>(table);
+    
+    //Create Scanner for Moving Table Data
+    std::shared_ptr<arrow::dataset::ScannerBuilder> write_scanner_builder = arrow::dataset::ScannerBuilder::FromRecordBatchReader(write_dataset);
+    ARROW_ASSIGN_OR_RAISE(std::shared_ptr<arrow::dataset::Scanner> write_scanner, write_scanner_builder->Finish());
+
+    //Prepare Schema, Partitioning, and File Format Variables
+    std::shared_ptr<arrow::Schema> partition_schema = arrow::schema({arrow::field("a", arrow::utf8())});
+    std::shared_ptr<arrow::dataset::HivePartitioning> partitioning = std::make_shared<arrow::dataset::HivePartitioning>(partition_schema);
+    
+    std::shared_ptr<arrow::dataset::ParquetFileFormat> write_format = std::make_shared<arrow::dataset::ParquetFileFormat>();
+    
+    //Configure FileSystemDatasetWriteOptions
+    arrow::dataset::FileSystemDatasetWriteOptions write_options;
+
+    write_options.file_write_options     = write_format->DefaultWriteOptions();
+    write_options.filesystem             = fs;
+    write_options.base_dir               = "write_dataset";
+    write_options.partitioning           = partitioning;
+    write_options.basename_template      = "part{i}.parquet";
+    write_options.existing_data_behavior = arrow::dataset::ExistingDataBehavior::kOverwriteOrIgnore;
+
+    //Write Dataset to Disk
+    ARROW_RETURN_NOT_OK(arrow::dataset::FileSystemDataset::Write(write_options, write_scanner));    
+
+//----------READ WRITED INFORMATION--------------------------
+
+    std::cerr << "~~~~~~~~~~~~~~~~~READING~~~~~~~~~~~~~~~~~~~" << std::endl;
+    arrow::MemoryPool* pool = arrow::default_memory_pool();
+    std::shared_ptr<arrow::io::RandomAccessFile> input;
+    ARROW_ASSIGN_OR_RAISE(input, arrow::io::ReadableFile::Open("./" + write_options.base_dir + "/a=0/part0.parquet"));
+
+    // Open Parquet file reader
+    std::unique_ptr<parquet::arrow::FileReader> arrow_reader;
+    ARROW_RETURN_NOT_OK(parquet::arrow::OpenFile(input, pool, &arrow_reader));
+
+    // Read entire file as a single Arrow table
+    std::shared_ptr<arrow::Table> table_readed;
+    ARROW_RETURN_NOT_OK(arrow_reader->ReadTable(&table_readed));
+
+    std::cerr << table_readed->ToString();
+    std::cerr << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
     return arrow::Status::OK();
 }
 
