@@ -14,8 +14,17 @@
 #include <arrow/dataset/partition.h>
 #include <iostream>
 
+#include <parquet/metadata.h>
+#include <parquet/stream_reader.h>
+#include <parquet/stream_writer.h>
 
-#define DATASET_DIR  std::string("ecg_datasets")
+using parquet::WriterProperties;
+using parquet::ArrowWriterProperties;
+using parquet::ParquetVersion;
+using parquet::ParquetDataPageVersion;
+using arrow::Compression;
+
+#define DATASET_DIR  std::string("ecg_datasets_big")
 #define DATASET_NAME std::string("/ecg_iter.parquet")//std::string("/ecg.parquet")
 
 arrow::Status RunMain_Base() {
