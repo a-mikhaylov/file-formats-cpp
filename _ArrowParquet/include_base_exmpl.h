@@ -14,6 +14,10 @@
 #include <arrow/dataset/partition.h>
 #include <iostream>
 
+
+#define DATASET_DIR  std::string("ecg_datasets")
+#define DATASET_NAME std::string("/ecg_iter.parquet")//std::string("/ecg.parquet")
+
 arrow::Status RunMain_Base() {
     // (Doc section: RunMain Start)
     // (Doc section: int8builder 1 Append)

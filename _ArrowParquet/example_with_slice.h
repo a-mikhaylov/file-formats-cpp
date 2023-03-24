@@ -89,7 +89,7 @@ arrow::Status RunMain_WithSlicing() {
     // Making an options object lets us configure our dataset reading.
     arrow::dataset::FileSystemFactoryOptions options{};
     options.partitioning = arrow::dataset::HivePartitioning::MakeFactory();
-
+    
     std::shared_ptr<arrow::dataset::ParquetFileFormat> read_format = std::make_shared<arrow::dataset::ParquetFileFormat>();
     ARROW_ASSIGN_OR_RAISE(auto factory, arrow::dataset::FileSystemDatasetFactory::Make(
                                           fs, selector, read_format, options));
@@ -132,7 +132,7 @@ arrow::Status RunMain_WithSlicing() {
     write_options.partitioning           = partitioning;
     write_options.basename_template      = "part{i}.parquet";
     write_options.existing_data_behavior = arrow::dataset::ExistingDataBehavior::kOverwriteOrIgnore;
-
+    
     //Write Dataset to Disk
     ARROW_RETURN_NOT_OK(arrow::dataset::FileSystemDataset::Write(write_options, write_scanner));    
 
