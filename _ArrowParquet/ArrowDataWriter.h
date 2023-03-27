@@ -6,6 +6,7 @@
 #define PARQUET_DATA_DIR   std::string("DataWriter_RESULT")
 #define PARQUET_DATA_FNAME std::string("/Written.parquet")//std::string("/ecg.parquet")
 
+//пока что работает только с int32_t (несложно шаблонизировать)
 class ArrowDataWriter {
     std::shared_ptr<arrow::fs::FileSystem>         filesystem;
     std::unique_ptr<parquet::arrow::FileWriter>    file_writer;
@@ -27,23 +28,59 @@ class ArrowDataWriter {
         return arrow::Status::OK();
     }
 
-    //оставляет только допустимое кол-во столбцов и строк:
+    //оставляет только допустимое кол-во столбцов и строк в векторе, который хотим записать:
     //кол-во столбцов = кол-ву столбцов в схеме
     //кол-во строк должно быть попарно одинаково у каждого столбца
     bool PrepareData(std::vector<std::vector<int32_t>>& data) {
         int columns_cnt = schema.get()->field_names().size();  //кол-во столбцов, объявленное в схеме
         
+        //дали меньше столбцов, чем надо => отказываемся работать, чтобы не заполнять чем попало
+        if (data.size() < columns_cnt) {
+            std::cerr << "\t- PrepareData() failed" << std::endl;
+            return false;
+        }
+
         //откидываем лишние столбцы
         for (int i = data.size(); i > columns_cnt; --i) data.pop_back();
 
         //ищем самый короткий столбец, чтобы остальные подогнать под него
+        //(можно искать самый большой, а остальные дополнять нулями, но так не хочется)
         int min_row_count = 9999999;
         for (int i = 0; i < data.size(); ++i) 
             if (data[i].size() < min_row_count)
                 min_row_count = data[i].size();
 
+        for (int i = 0; i < data.size(); ++i)
+            data[i].resize(min_row_count);
+        
+        /* std::cerr << "{" << std::endl;
+        for (int i = 0; i < data.size(); ++i) {
+            std::cerr << "\t{";
+            for (int j = 0; j < data[i].size(); ++j)
+                std::cerr << data[i][j] << ", ";
+            std::cerr << "}," << std::endl; 
+        }
+        std::cerr << "}" << std::endl; */
+
         return true;
     } 
+
+    //превращает числовой вектор в табличку, которую можно будет записать
+    std::shared_ptr<arrow::Table> MakeTable(std::vector<std::vector<int32_t>>& data) {
+        if(!PrepareData(data))
+            return nullptr;
+
+        std::vector<std::shared_ptr<arrow::Array>> arrays(data.size());
+        arrow::NumericBuilder<arrow::Int32Type> builder;
+
+        for (int i = 0; i < arrays.size(); ++i) {
+            builder.AppendValues(data[i]);
+            builder.Finish(&arrays[i]);
+            builder.Reset();
+        }
+
+        return arrow::Table::Make(schema, arrays);
+    }
 
 public:
     //инициализация файловой системы, настроек, потока вывода, пути вывода
@@ -70,12 +107,6 @@ public:
         return arrow::Status::OK();
     }
 
-    arrow::Status Close() {
-        // filesystem.~__shared_ptr();
-        // file_writer.~unique_ptr();
-        // output.~__shared_ptr();
-    }
-
     ArrowDataWriter(
         const std::string& root_path, std::shared_ptr<arrow::Schema>& rule_schema,
         arrow::Compression::type CompressType) //arrow::Compression::UNCOMPRESSED 
@@ -85,7 +116,7 @@ public:
 
     ArrowDataWriter() {}
 
-    //запись данных в текущий файл (сделать создание таблицы из вектора чисел)
+    //запись данных в текущий файл
     arrow::Status Write(const arrow::Table &table, int64_t chunk_size = 67108864L) {
         ARROW_RETURN_NOT_OK(file_writer->WriteTable(table, chunk_size));
 
@@ -93,68 +124,47 @@ public:
     }
 
     arrow::Status Write(std::vector<std::vector<int32_t>> data, int64_t chunk_size = 67108864L) {
+        ARROW_RETURN_NOT_OK(Write(*MakeTable(data).get(), chunk_size));
 
         return arrow::Status::OK();
-    }
-
-    arrow::Status ReadAndShow() {
-        std::shared_ptr<arrow::io::RandomAccessFile> input;
-
-        ARROW_ASSIGN_OR_RAISE(input, arrow::io::ReadableFile::Open("./" + PARQUET_DATA_DIR + PARQUET_DATA_FNAME));
-
-        std::unique_ptr<parquet::arrow::FileReader> arrow_reader;
-        ARROW_RETURN_NOT_OK(parquet::arrow::OpenFile(input, arrow::default_memory_pool(), &arrow_reader));
-
-        std::shared_ptr<arrow::Table> table_readed;
-        ARROW_RETURN_NOT_OK(arrow_reader->ReadTable(&table_readed));
-
-        std::cerr << table_readed->ToString();
     }
 };
 
 
 arrow::Status RunMain_Real() {
+    std::vector<std::vector<int32_t>> dat =  
+        {
+            {0, 21, 22, 23, 0},
+            {1, 1,  2,  3,  0},
+            {2, 11, 12, 13, 0},
+            {3, 1,  2,  3,  0},
+            {4, 1,  2,  3,  0},
+            {5, 1,  2,  3,  0},
+            {6, 1,  2,  3,  0},
+            {7, 1,  2,  3,  0}
+        };
+
 {//Arrow Writer//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     std::shared_ptr<arrow::Schema> schema = arrow::schema(
         {
-            arrow::field("LR", arrow::int32()),
-            arrow::field("FR", arrow::int32()),
-            arrow::field("C1R", arrow::int32())
+            arrow::field("LR",  arrow::int32()),
+            arrow::field("FR",  arrow::int32()),
+            arrow::field("C1R", arrow::int32()),
+            arrow::field("C2L", arrow::int32()),
+            arrow::field("C3F", arrow::int32()),
+            arrow::field("C4R", arrow::int32()),
+            arrow::field("C5L", arrow::int32()),
+            arrow::field("C6F", arrow::int32()),
         });
 
     ArrowDataWriter ADWriter{"", schema, arrow::Compression::UNCOMPRESSED};
 
-    /* std::vector<std::string> v_sch = schema.get()->field_names();
+    ADWriter.Write(dat, 2048);
 
-    std::cerr << v_sch.size() << std::endl;
-    for (int i = 0; i < v_sch.size(); ++i) {
-        std::cerr << v_sch[i] << std::endl;
-    } */
-
-    std::shared_ptr<arrow::Array> array_a;
-    std::shared_ptr<arrow::Array> array_b;
-    std::shared_ptr<arrow::Array> array_c;
-    arrow::NumericBuilder<arrow::Int32Type> builder;
-    ARROW_RETURN_NOT_OK(builder.AppendValues({10, 11, 12, 13, 14, 15, 16, 17, 18, 19}));
-    ARROW_RETURN_NOT_OK(builder.Finish(&array_a));
-    builder.Reset();
-    ARROW_RETURN_NOT_OK(builder.AppendValues({90, 80, 70, 60, 50, 40, 30, 20, 10, 0}));
-    ARROW_RETURN_NOT_OK(builder.Finish(&array_b));
-    builder.Reset();
-    ARROW_RETURN_NOT_OK(builder.AppendValues({1, 2, 1, 2, 1, 2, 1, 2, 1, 2}));
-    ARROW_RETURN_NOT_OK(builder.Finish(&array_c));
-
-    std::shared_ptr<arrow::Table> table = arrow::Table::Make(schema, {array_a, array_b, array_c});
-    
-    ADWriter.Write(*table.get(), 2048);
-
-    ADWriter.Close();
 }//Arrow Writer//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-
-    // ADWriter.ReadAndShow();
+//***********************************************************************
     std::cerr << "StartReading" << std::endl;
-    //***********************************************************************
     std::shared_ptr<arrow::io::RandomAccessFile> input;
 
     ARROW_ASSIGN_OR_RAISE(input, arrow::io::ReadableFile::Open("./" + PARQUET_DATA_DIR + PARQUET_DATA_FNAME));
@@ -173,6 +183,6 @@ arrow::Status RunMain_Real() {
     std::cerr << "\t- Read table done" << std::endl;
 
     std::cerr << table_readed->ToString();
-    //***********************************************************************
+//***********************************************************************
     return arrow::Status::OK();
 }

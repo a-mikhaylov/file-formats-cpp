@@ -27,7 +27,7 @@ arrow::Status RunMain() {
 }
 
 int _parquetMain() {
-    arrow::Status st = RunMain_Iterative();
+    arrow::Status st = RunMain_Real();
     if (!st.ok()) {
         std::cerr << st << std::endl;
         return 1;
