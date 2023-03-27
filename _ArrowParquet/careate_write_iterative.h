@@ -53,6 +53,19 @@ arrow::Result<std::string> CreateAndWriteIterate(const std::shared_ptr<arrow::fs
 
     std::cerr << "\t- FileWriter created" << std::endl;
     ARROW_RETURN_NOT_OK(file_writer->WriteTable(*table.get(), 2048));
+//Change Table
+    ARROW_RETURN_NOT_OK(builder.AppendValues({11, 22, 33}));
+    ARROW_RETURN_NOT_OK(builder.Finish(&array_a));
+    builder.Reset();
+    ARROW_RETURN_NOT_OK(builder.AppendValues({44, 55, 66}));
+    ARROW_RETURN_NOT_OK(builder.Finish(&array_b));
+    builder.Reset();
+    ARROW_RETURN_NOT_OK(builder.AppendValues({77, 88, 99}));
+    ARROW_RETURN_NOT_OK(builder.Finish(&array_c));
+
+    table = arrow::Table::Make(schema, {array_a, array_b, array_c});
+//----------    
+
     ARROW_RETURN_NOT_OK(file_writer->WriteTable(*table.get(), 2048));
 
     std::cerr << "\t- Table written" << std::endl;

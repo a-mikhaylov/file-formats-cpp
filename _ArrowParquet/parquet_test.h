@@ -4,7 +4,7 @@
 #include "example_with_slice.h"
 #include "create_write_once.h"
 #include "careate_write_iterative.h"
-
+#include "ArrowDataWriter.h"
 
 arrow::Status RunMain() {
     ARROW_RETURN_NOT_OK(PrepareECGIterateEnv());
