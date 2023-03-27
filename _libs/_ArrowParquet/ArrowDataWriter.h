@@ -129,41 +129,51 @@ public:
         return arrow::Status::OK();
     }
 };
-
+//-------------------------------------------------------------------------
 
 arrow::Status RunMain_Real() {
-    std::vector<std::vector<int32_t>> dat =  
+
+    std::vector<std::vector<int32_t>> dat = //[8x10] 
         {
-            {0, 21, 22, 23, 0},
-            {1, 1,  2,  3,  0},
-            {2, 11, 12, 13, 0},
-            {3, 1,  2,  3,  0},
-            {4, 1,  2,  3,  0},
-            {5, 1,  2,  3,  0},
-            {6, 1,  2,  3,  0},
-            {7, 1,  2,  3,  0}
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
         };
 
-{//Arrow Writer//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    std::shared_ptr<arrow::Schema> schema = arrow::schema(
-        {
-            arrow::field("LR",  arrow::int32()),
-            arrow::field("FR",  arrow::int32()),
-            arrow::field("C1R", arrow::int32()),
-            arrow::field("C2L", arrow::int32()),
-            arrow::field("C3F", arrow::int32()),
-            arrow::field("C4R", arrow::int32()),
-            arrow::field("C5L", arrow::int32()),
-            arrow::field("C6F", arrow::int32()),
-        });
+    BinReader BReader{BIN_HDR_PATH, 10};
 
-    ArrowDataWriter ADWriter{"", schema, arrow::Compression::UNCOMPRESSED};
+    BReader._TestRun(5, dat);
+    return arrow::Status::OK();
 
-    ADWriter.Write(dat, 2048);
+    {//Arrow Writer//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        std::shared_ptr<arrow::Schema> schema = arrow::schema(
+            {
+                arrow::field("LR",  arrow::int32()),
+                arrow::field("FR",  arrow::int32()),
+                arrow::field("C1R", arrow::int32()),
+                arrow::field("C2L", arrow::int32()),
+                arrow::field("C3F", arrow::int32()),
+                arrow::field("C4R", arrow::int32()),
+                arrow::field("C5L", arrow::int32()),
+                arrow::field("C6F", arrow::int32()),
+            });
 
-}//Arrow Writer//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        ArrowDataWriter ADWriter{"", schema, arrow::Compression::UNCOMPRESSED};
 
-//***********************************************************************
+        // while(getData(dat) != false) {
+            ADWriter.Write(dat, 2048);
+        // }
+
+    }
+
+
+    return arrow::Status::OK();
+//Reading for debug//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     std::cerr << "StartReading" << std::endl;
     std::shared_ptr<arrow::io::RandomAccessFile> input;
 
@@ -183,6 +193,6 @@ arrow::Status RunMain_Real() {
     std::cerr << "\t- Read table done" << std::endl;
 
     std::cerr << table_readed->ToString();
-//***********************************************************************
+    
     return arrow::Status::OK();
 }
