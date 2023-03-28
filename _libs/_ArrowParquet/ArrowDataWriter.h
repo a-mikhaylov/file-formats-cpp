@@ -8,6 +8,8 @@
 
 //пока что работает только с int32_t (несложно шаблонизировать)
 class ArrowDataWriter {
+    int POINTS_WRITED = 0;
+
     std::shared_ptr<arrow::fs::FileSystem>         filesystem;
     std::unique_ptr<parquet::arrow::FileWriter>    file_writer;
     std::shared_ptr<::arrow::io::FileOutputStream> output;
@@ -116,6 +118,9 @@ public:
 
     ArrowDataWriter() {}
 
+    ~ArrowDataWriter() {
+        std::cerr << "!--Points Writed: " << POINTS_WRITED << std::endl;
+    }
     //запись данных в текущий файл
     arrow::Status Write(const arrow::Table &table, int64_t chunk_size = 67108864L) {
         ARROW_RETURN_NOT_OK(file_writer->WriteTable(table, chunk_size));
@@ -123,32 +128,28 @@ public:
         return arrow::Status::OK();
     }
 
-    arrow::Status Write(std::vector<std::vector<int32_t>> data, int64_t chunk_size = 67108864L) {
+    arrow::Status Write(std::vector<std::vector<int32_t>>& data, int64_t chunk_size = 67108864L) {
         ARROW_RETURN_NOT_OK(Write(*MakeTable(data).get(), chunk_size));
-
+        POINTS_WRITED += data[0].size();
         return arrow::Status::OK();
     }
 };
 //-------------------------------------------------------------------------
 
 arrow::Status RunMain_Real() {
+    int QUANT = 100000;
 
-    std::vector<std::vector<int32_t>> dat = //[8x10] 
-        {
-            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-        };
+    std::vector<std::vector<int32_t>> dat = { {}, {}, {}, {}, {}, {}, {}, {} };
 
-    BinReader BReader{BIN_HDR_PATH, 10};
+    for (int i = 0; i < QUANT; ++i) {
+        for (int j = 0; j < dat.size(); ++j) 
+            dat[j].push_back(0);
+    }
 
-    BReader._TestRun(5, dat);
-    return arrow::Status::OK();
+    BinReader BReader{BIN_HDR_PATH, QUANT};
+
+    /* BReader._TestRun(5, dat);    //проверка работоспособности getData
+    return arrow::Status::OK(); */
 
     {//Arrow Writer//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         std::shared_ptr<arrow::Schema> schema = arrow::schema(
@@ -164,11 +165,14 @@ arrow::Status RunMain_Real() {
             });
 
         ArrowDataWriter ADWriter{"", schema, arrow::Compression::UNCOMPRESSED};
-
-        // while(getData(dat) != false) {
+        int cnt = 0;
+        while(BReader.getData(dat)/*  && cnt++ < 5 */) {
             ADWriter.Write(dat, 2048);
-        // }
-
+            /* std::cerr << dat.size() << std::endl;
+            for (int i = 0; i < dat.size(); ++i) 
+                std::cerr << "\td[" << i << "]: " << dat[i].size() << std::endl;
+            std::cerr << "--------------------------------" << std::endl; */
+        }
     }
 
 
