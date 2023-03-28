@@ -5,6 +5,7 @@
 #define BIN_HDR_PATH std::string("/media/oldwizzard/kotel/_work/git/file-formats-cpp/_data/PX1447191017125822")
 
 //чтение данных из bin файла
+//TODO: оптимизировать - избавиться от векторов в работе - перейти только на указатели
 class BinReader {
     int POINTS_READED = 0;
 
@@ -130,4 +131,18 @@ public:
         std::cerr << "-----------------------" << std::endl;
     }
     
+};
+
+class BinWriter {
+    int POINTS_WRITED = 0;
+
+    Header      hdr;
+    int         channels_count; //кол-во каналов в записи
+    int         SIZE;           //кол-во считываемых байтов за один прогон (1 точка с канала)
+    std::string file_path; //без расширения!
+    int         read_write_quant; //кол-во считываемых значений за одиин прогон
+    bool        next_stop = false; //если следующего прогона быть не должно - ставим в true
+    int32_t* buf; 
+
+    std::ifstream bin_output;
 };
