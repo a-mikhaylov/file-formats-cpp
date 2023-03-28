@@ -92,18 +92,22 @@ arrow::Status RunMain_Iterative() {
     ARROW_RETURN_NOT_OK(PrepareECGIterateEnv());
 
     std::cerr << "~~~~~~~~~~~~~~~~~READING~~~~~~~~~~~~~~~~~~~" << std::endl;
-    arrow::MemoryPool* pool = arrow::default_memory_pool();
+    // arrow::MemoryPool* pool = arrow::default_memory_pool();
     std::shared_ptr<arrow::io::RandomAccessFile> input;
 
     ARROW_ASSIGN_OR_RAISE(input, arrow::io::ReadableFile::Open(DATASET_DIR + DATASET_NAME));
 
     std::unique_ptr<parquet::arrow::FileReader> arrow_reader;
-    ARROW_RETURN_NOT_OK(parquet::arrow::OpenFile(input, pool, &arrow_reader));
+    ARROW_RETURN_NOT_OK(parquet::arrow::OpenFile(input, arrow::default_memory_pool(), &arrow_reader));
 
     std::shared_ptr<arrow::Table> table_readed;
-    ARROW_RETURN_NOT_OK(arrow_reader->ReadTable(&table_readed));
+    //только 0 и 1 столбцы (LR, C1R)
+    // ARROW_RETURN_NOT_OK(arrow_reader->ReadTable({0, 2}, &table_readed));
+    
+    for (int i = 0; i < arrow_reader->num_row_groups(); ++i) {
+        ARROW_RETURN_NOT_OK(arrow_reader->ReadRowGroup(i, &table_readed));
 
-    std::cerr << table_readed->ToString();
-
+        std::cerr << table_readed->ToString();
+    }
     return arrow::Status::OK();
 }

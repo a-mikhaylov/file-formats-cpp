@@ -4,7 +4,7 @@
 #include "careate_write_iterative.h"
 
 #define PARQUET_DATA_DIR   std::string("DataWriter_RESULT")
-#define PARQUET_DATA_FNAME std::string("/Written.parquet")//std::string("/ecg.parquet")
+#define PARQUET_DATA_FNAME std::string("/Written-ZSTD.parquet")//std::string("/ecg.parquet")
 
 //пока что работает только с int32_t (несложно шаблонизировать)
 class ArrowDataWriter {
@@ -87,17 +87,18 @@ class ArrowDataWriter {
 public:
     //инициализация файловой системы, настроек, потока вывода, пути вывода
     arrow::Status Init(
-        const std::string& root_path, std::shared_ptr<arrow::Schema>& rule_schema,
+        const std::string& root_path, const std::string& DATA_DIR, 
+        const std::string& DATA_FNAME, std::shared_ptr<arrow::Schema>& rule_schema,
         arrow::Compression::type CompressType) //arrow::Compression::UNCOMPRESSED
     {
         ARROW_RETURN_NOT_OK(PrepareFS());
 
-        base_path = root_path + PARQUET_DATA_DIR;
+        base_path = root_path + DATA_DIR;
         schema  = rule_schema;
 
         ARROW_RETURN_NOT_OK(filesystem->CreateDir(base_path));
         
-        ARROW_ASSIGN_OR_RAISE(output, arrow::io::FileOutputStream::Open(base_path + PARQUET_DATA_FNAME));
+        ARROW_ASSIGN_OR_RAISE(output, arrow::io::FileOutputStream::Open(base_path + DATA_FNAME));
 
         std::shared_ptr<WriterProperties> props =
             WriterProperties::Builder().compression(CompressType)->build();
@@ -110,10 +111,11 @@ public:
     }
 
     ArrowDataWriter(
-        const std::string& root_path, std::shared_ptr<arrow::Schema>& rule_schema,
+        const std::string& root_path, const std::string& DATA_DIR, 
+        const std::string& DATA_FNAME,std::shared_ptr<arrow::Schema>& rule_schema,
         arrow::Compression::type CompressType) //arrow::Compression::UNCOMPRESSED 
     {
-        Init(root_path, rule_schema, CompressType);
+        Init(root_path, DATA_DIR, DATA_FNAME, rule_schema, CompressType);
     }
 
     ArrowDataWriter() {}
@@ -134,69 +136,4 @@ public:
         return arrow::Status::OK();
     }
 };
-//-------------------------------------------------------------------------
 
-arrow::Status RunMain_Real() {
-    int QUANT = 100000;
-
-    std::vector<std::vector<int32_t>> dat = { {}, {}, {}, {}, {}, {}, {}, {} };
-
-    for (int i = 0; i < QUANT; ++i) {
-        for (int j = 0; j < dat.size(); ++j) 
-            dat[j].push_back(0);
-    }
-
-    BinReader BReader{BIN_HDR_PATH, QUANT};
-
-    /* BReader._TestRun(5, dat);    //проверка работоспособности getData
-    return arrow::Status::OK(); */
-
-    {//Arrow Writer//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        std::shared_ptr<arrow::Schema> schema = arrow::schema(
-            {
-                arrow::field("LR",  arrow::int32()),
-                arrow::field("FR",  arrow::int32()),
-                arrow::field("C1R", arrow::int32()),
-                arrow::field("C2L", arrow::int32()),
-                arrow::field("C3F", arrow::int32()),
-                arrow::field("C4R", arrow::int32()),
-                arrow::field("C5L", arrow::int32()),
-                arrow::field("C6F", arrow::int32()),
-            });
-
-        ArrowDataWriter ADWriter{"", schema, arrow::Compression::UNCOMPRESSED};
-        int cnt = 0;
-        while(BReader.getData(dat)/*  && cnt++ < 5 */) {
-            ADWriter.Write(dat, 2048);
-            /* std::cerr << dat.size() << std::endl;
-            for (int i = 0; i < dat.size(); ++i) 
-                std::cerr << "\td[" << i << "]: " << dat[i].size() << std::endl;
-            std::cerr << "--------------------------------" << std::endl; */
-        }
-    }
-
-
-    return arrow::Status::OK();
-//Reading for debug//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    std::cerr << "StartReading" << std::endl;
-    std::shared_ptr<arrow::io::RandomAccessFile> input;
-
-    ARROW_ASSIGN_OR_RAISE(input, arrow::io::ReadableFile::Open("./" + PARQUET_DATA_DIR + PARQUET_DATA_FNAME));
-    
-    std::cerr << "\t- Open done" << std::endl;
-    
-    arrow::MemoryPool* pool = arrow::default_memory_pool();
-    std::unique_ptr<parquet::arrow::FileReader> arrow_reader;
-    ARROW_RETURN_NOT_OK(parquet::arrow::OpenFile(input, pool, &arrow_reader));
-
-    std::cerr << "\t- Open file done" << std::endl;
-
-    std::shared_ptr<arrow::Table> table_readed;
-    ARROW_RETURN_NOT_OK(arrow_reader->ReadTable(&table_readed));
-
-    std::cerr << "\t- Read table done" << std::endl;
-
-    std::cerr << table_readed->ToString();
-    
-    return arrow::Status::OK();
-}
