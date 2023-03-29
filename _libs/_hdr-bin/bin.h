@@ -146,7 +146,6 @@ class BinWriter {
     std::ofstream bin_output;
 
     void FirstRun(std::vector<std::vector<int32_t>>& dat) {
-        std::cerr << "::FirstRun()" << std::endl;
         channels_count   = dat.size();
 
         SIZE    = channels_count * sizeof(int32_t);
@@ -163,7 +162,6 @@ public:
             std::cerr << "[ERROR]: .bin file didn't found!!!" << std::endl;
             return;
         }
-        std::cerr << "\t- bin out success" << std::endl;
     }
 
     BinWriter(std::string path) { Init(path); }
