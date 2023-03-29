@@ -8,20 +8,37 @@
 #include "ArrowDataWriter.h"
 #include "ArrowDataReader.h"
 
+void PrintVec(std::vector<std::vector<int32_t>>& vec) {
+    std::cerr << "VECTOR:~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
+    for (int i = 0; i < vec.size(); ++i) {
+        std::cerr << "\t" << i << ": { ";
+        for (int j = 0; j < vec[i].size(); ++j) {
+            std::cerr << vec[i][j] << ", ";
+        }
+        std::cerr << "\b\b }" << std::endl;
+    }
+    std::cerr << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
+}
+
+
+//Комментарии к данному преобразованию (возможно, ошибки при реализации):
+//  - При записи квантами разных размеров - получаются разные по размеру итоговые 
+//файлы, содержание ещё не проверено, но первые точки совпадают.
+//
+//  - При записи без сжатия и QUANT > 1000 (примерно) итоговый файл получается 
+//меньше исходного.
+//
+//  - Запись маленькими квантами - очень долгая, куда выгоднее брать QUANT = 10000,
+//целостность данных при таком формате ещё не изучена.
 arrow::Status RunMain() {
-    int QUANT = 100000;     //сколько точек читать-писать за раз
+    int QUANT = 10;     //сколько точек читать-писать за раз
 
     std::vector<std::vector<int32_t>> dat = { {}, {}, {}, {}, {}, {}, {}, {} };
-
     for (int i = 0; i < QUANT; ++i) {
         for (int j = 0; j < dat.size(); ++j) 
             dat[j].push_back(0);
     }
-
-    BinReader BReader{BIN_HDR_PATH, QUANT};
-
-    /* BReader._TestRun(5, dat);    //проверка работоспособности getData
-    return arrow::Status::OK(); */
+    std::vector<std::vector<int32_t>> dat_2 = dat;
 
     std::shared_ptr<arrow::Schema> schema = arrow::schema(
         {
@@ -35,17 +52,32 @@ arrow::Status RunMain() {
             arrow::field("C6F", arrow::int32()),
         });
 
-    ArrowDataWriter ADWriter{"", "ArrowParquet_RESULT", "/PX1447191017125822-snappy.parquet",
-                             schema, arrow::Compression::SNAPPY};
+    BinReader BReader{BIN_HDR_PATH, QUANT};
+    
+    //Запись из *.bin в *.parquet
+    { 
+        ArrowDataWriter ADWriter{"", "ArrowParquet_RESULT", "/PX1447191017125822-uncomp-2.parquet",
+                                schema, arrow::Compression::UNCOMPRESSED};
+        // while(BReader.getData(dat) && cnt--)
+            // ADWriter.Write(dat, 2048);
+    }
 
-    while(BReader.getData(dat))
-        ADWriter.Write(dat, 2048);
+    //Чтение из *.bin и из *.parquet с целью проверки совпадения данных
+    {    
+        ArrowDataReader ADReader{"./ArrowParquet_RESULT/PX1447191017125822-uncomp-2.parquet"};
+
+        BReader.getData(dat);
+        ADReader.Read(dat_2);
+
+        PrintVec(dat); 
+        PrintVec(dat_2);
+    }
 
     return arrow::Status::OK();
 }
 
 int _parquetMain() {
-    arrow::Status st = RunMain_Iterative();
+    arrow::Status st = RunMain();
     if (!st.ok()) {
         std::cerr << st << std::endl;
         return 1;
