@@ -41,13 +41,15 @@ public:
     ArrowDataReader(std::string fname) { Init(fname); }
 
     bool Read(std::vector<std::vector<int32_t>>& dat) {
-        if (current_group == row_groups_count)
+        if (current_group == row_groups_count) {
+            std::cerr << "Rows Groups in input:" << row_groups_count << std::endl;
             return false;
+        }
         
         arrow_reader->ReadRowGroup(current_group++, &table_readed);
         ConvertData(dat);
-        
-        std::cerr << table_readed->ToString();
+
+        // std::cerr << table_readed->ToString();
         return true;
     }
  

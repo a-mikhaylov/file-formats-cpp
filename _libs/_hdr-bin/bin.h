@@ -15,7 +15,7 @@ class BinReader {
     std::string file_path; //без расширения!
     int         read_write_quant; //кол-во считываемых значений за одиин прогон
     bool        next_stop = false; //если следующего прогона быть не должно - ставим в true
-    int32_t* buf; 
+    int32_t* buf = nullptr; 
 
     std::ifstream bin_input;
     bool PrepareData(std::vector<std::vector<int32_t>>& data) {
@@ -78,10 +78,11 @@ public:
 
     ~BinReader() { 
         std::cerr << "!--Points Readed: " << POINTS_READED << std::endl;
-        delete [] buf; 
+        if (buf != nullptr)
+            delete [] buf; 
     }
 
-    bool getData(std::vector<std::vector<int32_t>>& data) {
+    bool Read(std::vector<std::vector<int32_t>>& data) {
         if (next_stop) 
             return false;
 
@@ -113,7 +114,7 @@ public:
         std::cerr << "::_TestRun()" << std::endl;
 
         for (int i = 0; i < go_times; ++i) {
-            if (getData(data)) {
+            if (Read(data)) {
                 printVec(data);
             }
         }
@@ -136,13 +137,59 @@ public:
 class BinWriter {
     int POINTS_WRITED = 0;
 
-    Header      hdr;
-    int         channels_count; //кол-во каналов в записи
-    int         SIZE;           //кол-во считываемых байтов за один прогон (1 точка с канала)
-    std::string file_path; //без расширения!
-    int         read_write_quant; //кол-во считываемых значений за одиин прогон
-    bool        next_stop = false; //если следующего прогона быть не должно - ставим в true
-    int32_t* buf; 
+    int         channels_count = -1; //кол-во каналов в записи
+    int         SIZE = -1;           //кол-во записываемых байтов за один прогон (1 точка с канала)
+    std::string file_path;          //полный путь к файлу
 
-    std::ifstream bin_output;
+    int32_t* buf = nullptr; 
+
+    std::ofstream bin_output;
+
+    void FirstRun(std::vector<std::vector<int32_t>>& dat) {
+        std::cerr << "::FirstRun()" << std::endl;
+        channels_count   = dat.size();
+
+        SIZE    = channels_count * sizeof(int32_t);
+        buf     = new int32_t[channels_count];
+    }
+
+public:
+
+    void Init(std::string path) {
+        file_path = path;
+
+        bin_output.open(file_path);
+        if (!bin_output.is_open()) {
+            std::cerr << "[ERROR]: .bin file didn't found!!!" << std::endl;
+            return;
+        }
+        std::cerr << "\t- bin out success" << std::endl;
+    }
+
+    BinWriter(std::string path) { Init(path); }
+
+    ~BinWriter() {
+        if (buf != nullptr) 
+            delete [] buf;
+    }
+
+    bool Write(std::vector<std::vector<int32_t>>& dat) {
+        //инициализируем оставшиеся значения, считая, что за всё время записи
+        //dat не изменит кол-ва столбцов
+        if (SIZE == -1)
+            FirstRun(dat);
+        
+        int row_count = dat[0].size();
+
+        for (int i = 0; i < row_count; ++i) {           // строки
+            
+            for (int j = 0; j < channels_count; ++j)    // столбцы
+                buf[j] = dat[j][i];
+            
+            bin_output.write((char *)buf, SIZE);
+        }
+        
+        return true;
+    }
+
 };

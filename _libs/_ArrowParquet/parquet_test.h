@@ -26,10 +26,9 @@ void PrintVec(std::vector<std::vector<int32_t>>& vec) {
 //файлы, содержание ещё не проверено, но первые точки совпадают.
 //
 //  - При записи без сжатия и QUANT > 1000 (примерно) итоговый файл получается 
-//меньше исходного.
+//меньше исходного. (676,1 МБ -> 384,1 МБ). Потерь данных при этом не происходит
 //
-//  - Запись маленькими квантами - очень долгая, куда выгоднее брать QUANT = 10000,
-//целостность данных при таком формате ещё не изучена.
+//  - Запись маленькими квантами - очень долгая, куда выгоднее брать QUANT = 10000.
 arrow::Status RunMain() {
     int QUANT = 10;     //сколько точек читать-писать за раз
 
@@ -51,27 +50,40 @@ arrow::Status RunMain() {
             arrow::field("C5L", arrow::int32()),
             arrow::field("C6F", arrow::int32()),
         });
-
-    BinReader BReader{BIN_HDR_PATH, QUANT};
-    
+/*
     //Запись из *.bin в *.parquet
     { 
+        BinReader BReader{BIN_HDR_PATH, QUANT};
         ArrowDataWriter ADWriter{"", "ArrowParquet_RESULT", "/PX1447191017125822-uncomp-2.parquet",
                                 schema, arrow::Compression::UNCOMPRESSED};
-        // while(BReader.getData(dat) && cnt--)
+        // while(BReader.Read(dat) && cnt--)
             // ADWriter.Write(dat, 2048);
     }
 
     //Чтение из *.bin и из *.parquet с целью проверки совпадения данных
     {    
+        BinReader BReader{BIN_HDR_PATH, QUANT};
         ArrowDataReader ADReader{"./ArrowParquet_RESULT/PX1447191017125822-uncomp-2.parquet"};
 
-        BReader.getData(dat);
+        BReader.Read(dat);
         ADReader.Read(dat_2);
 
         PrintVec(dat); 
         PrintVec(dat_2);
     }
+*/
+    //Запись из *.parquet в *.bin (проверка на корректность записи - совпадение хешей)
+    {
+        ArrowDataReader ADReader{"./ArrowParquet_RESULT/PX1447191017125822-uncomp.parquet"};
+        BinWriter       BWriter{"./BIN_DATA_rewrite/PX1447191017125822-uncomp.bin"};
+        
+        while(ADReader.Read(dat))
+            BWriter.Write(dat);
+
+        //хеш файла ./_data/PX<...>.bin и файла ./BIN_DATA_rewrite/PX<...>-uncomp.bin
+        //полностью совпадают, то есть запись и чтение из parquet происходят корректно.
+    }
+    
 
     return arrow::Status::OK();
 }
