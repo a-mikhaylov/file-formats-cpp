@@ -17,41 +17,26 @@ class BinReader {
     bool        next_stop = false; //если следующего прогона быть не должно - ставим в true
     
     int32_t*  buf   = nullptr; 
+    int32_t*  big_buf   = nullptr; 
     int32_t** buf2D = nullptr; //[точка][канал] = значение (read_write_quant x channels_count)
 
     std::ifstream bin_input;
 
     bool PrepareData(std::vector<std::vector<int32_t>>& data) {
-        // std::cerr << "::PrepareData()" << std::endl;
-        int columns_cnt = channels_count;  //кол-во столбцов, как в hdr
-        
-        //дали меньше столбцов, чем надо => отказываемся работать, чтобы не заполнять чем попало
-        if (data.size() < columns_cnt) {
-            for (int i = data.size(); i < columns_cnt; ++i) data.push_back({});    
-        }
-
-        //откидываем лишние столбцы
-        for (int i = data.size(); i > columns_cnt; --i) data.pop_back();
+        if (data.size() != channels_count)
+            data.resize(channels_count);
 
         //делаем все столбцы длиной в read_write_quant
         for (int i = 0; i < data.size(); ++i)
-            data[i].resize(read_write_quant);
-        
-        /* std::cerr << "{" << std::endl;
-        for (int i = 0; i < data.size(); ++i) {
-            std::cerr << "\t{";
-            for (int j = 0; j < data[i].size(); ++j)
-                std::cerr << data[i][j] << ", ";
-            std::cerr << "}," << std::endl; 
-        }
-        std::cerr << "}" << std::endl; */
+            if (data[i].size() != read_write_quant)
+                data[i].resize(read_write_quant);
 
         return true;
     } 
 
     //последняя итерация - прочитали меньше, чем квант
     void CutTail(std::vector<std::vector<int32_t>>& data, int how_much_save) {
-        std::cerr << "::CutTail()" << std::endl;
+        // std::cerr << "::CutTail()" << std::endl;
         for (int i = 0; i < data.size(); ++i) 
             data[i].resize(how_much_save);
     }
@@ -84,6 +69,7 @@ public:
         std::cerr << "\t- Channels count = " << channels_count << std::endl;
         
         buf = new int32_t[channels_count];
+        big_buf = new int32_t[channels_count * read_write_quant];
         
         buf2D = new int32_t*[read_write_quant];
         for (int i = 0; i < read_write_quant; ++i) buf2D[i] = new int32_t[channels_count];
@@ -95,6 +81,9 @@ public:
         std::cerr << "!--Points Readed: " << POINTS_READED << std::endl;
         if (buf != nullptr)
             delete [] buf; 
+
+        if (big_buf != nullptr)
+            delete [] big_buf; 
 
         if (buf2D != nullptr) {
             for (int i = 0; i < channels_count; ++i)
@@ -128,7 +117,38 @@ public:
         if (i != read_write_quant)
             CutTail(data, i);
 
-        // delete [] buf;
+        return true;
+    }
+
+    //читаем большую пачку в буффер
+    //выигрыша по времени нет (наверное, можно оптимизировать)
+    bool Read2(std::vector<std::vector<int32_t>>& data) {
+        if (next_stop) 
+            return false;
+
+        if (!PrepareData(data))
+            return false;
+        
+        bin_input.read((char *)big_buf, SIZE * read_write_quant);
+
+        if (bin_input.eof()) {
+            next_stop = true;
+        }
+
+        int points_readed_last_time = bin_input.gcount() / channels_count / sizeof(int32_t);
+        POINTS_READED += points_readed_last_time;
+
+        for (int i = 0; i < channels_count; ++i) {
+            for (int j = 0; j < points_readed_last_time; ++j) {
+                data[i][j] = big_buf[j * channels_count + i];
+            }
+        }
+
+
+        if (points_readed_last_time != read_write_quant) {
+            CutTail(data, points_readed_last_time);
+        }
+
         return true;
     }
 

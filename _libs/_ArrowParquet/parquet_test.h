@@ -17,20 +17,21 @@ void PrintVec(std::vector<std::vector<int32_t>>& vec) {
     for (int i = 0; i < vec.size(); ++i) {
         std::cerr << "\t" << i << ": { ";
         for (int j = 0; j < vec[i].size(); ++j) {
-            std::cerr << vec[i][j] << ", ";
+            std::cerr << vec[i][j] << ",\t";
         }
         std::cerr << "\b\b }" << std::endl;
     }
     std::cerr << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
 }
 
-void LogWriteResult(std::ofstream& log_out, int step_num, int quant_size,  
-                    int parquet_size, int bin_parquet_time, int parquet_bin_time) 
+void LogWriteResult(std::ofstream& log_out, int step_num, int quant_size, int parquet_size, 
+                    int bin_parquet_time, int parquet_bin_time, std::string comment = "") 
 {
     float b_p_time = (float)bin_parquet_time / 1000000.0f; // перевод в секунды
     float p_b_time = (float)parquet_bin_time / 1000000.0f; // перевод в секунды
 
     log_out << "NODE #" << step_num << ":" << std::endl
+            << "Comment: " << comment << std::endl << std::endl
             << "\tQuant     = " << quant_size << std::endl
             << "\tFile size = " << parquet_size << std::endl
             << std::endl
@@ -46,7 +47,7 @@ void LogWriteResult(std::ofstream& log_out, int step_num, int quant_size,
 //  - Время записи обратно пропорционально размеру кванта (примеры в лог-файле)
 
 arrow::Status RunMain() {
-    int QUANT = 50000;     //сколько точек читать-писать за раз
+    int QUANT = 10;     //сколько точек читать-писать за раз
 
     std::vector<int> quant_road = { /* 1000, 10000, 50000,  */100000 };
 
@@ -68,8 +69,6 @@ arrow::Status RunMain() {
     }
     std::vector<std::vector<int32_t>> dat_2 = dat;
 
-    int32_t** arrayPtr = nullptr; //QUANT x 8
-
     std::shared_ptr<arrow::Schema> schema = arrow::schema(
         {
             arrow::field("LR",  arrow::int32()),
@@ -81,11 +80,12 @@ arrow::Status RunMain() {
             arrow::field("C5L", arrow::int32()),
             arrow::field("C6F", arrow::int32()),
         });
+        
 
     for (int i = 0; i < quant_road.size(); ++i) {
         QUANT = quant_road[i];
         const std::string DATA_OUT_NAME     = "/PX1447191017125822-uncomp-" + std::to_string(QUANT) + ".parquet";
-        const std::string REWRITE_FULL_NAME = "./BIN_DATA_rewrite/PX1447191017125822-QUANT-" + std::to_string(QUANT) + ".bin";
+        const std::string REWRITE_FULL_NAME = "./BIN_DATA_rewrite/PX1447191017125822-read2-QUANT-" + std::to_string(QUANT) + ".bin";
         
         //Запись из *.bin в *.parquet
         { 
@@ -94,7 +94,7 @@ arrow::Status RunMain() {
                                     schema, arrow::Compression::UNCOMPRESSED};
             bin_par_start = high_resolution_clock::now();
             
-            while(BReader.Read(dat))
+            while(BReader.Read2(dat))
                 ADWriter.Write(dat, 2048);
 
             bin_par_stop = high_resolution_clock::now();
@@ -117,8 +117,10 @@ arrow::Status RunMain() {
         }
         std::cerr << "[INFO]: " << i << " *.parquet --> *.bin - Complited!" << std::endl;
 
-        LogWriteResult(log_output , i, QUANT, -1, duration_cast<microseconds>(bin_par_stop - bin_par_start).count(),
-                        duration_cast<microseconds>(par_bin_stop - par_bin_start).count());
+        LogWriteResult(log_output , i, QUANT, -1, 
+                       duration_cast<microseconds>(bin_par_stop - bin_par_start).count(),
+                       duration_cast<microseconds>(par_bin_stop - par_bin_start).count(),
+                       "Uncomp: Read-v2");
     
     } //for cycle
 

@@ -91,7 +91,8 @@ class ArrowDataWriter {
             return nullptr;
 
         // arrays.clear();
-        // arrays.resize(data.size());
+        if (arrays.size() != data.size()) 
+            arrays.resize(data.size());
 
         for (int i = 0; i < arrays.size(); ++i) {
             builder.AppendValues(data[i]);
