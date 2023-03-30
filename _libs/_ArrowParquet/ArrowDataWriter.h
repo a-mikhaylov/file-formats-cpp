@@ -15,8 +15,12 @@ class ArrowDataWriter {
     std::shared_ptr<::arrow::io::FileOutputStream> output;
     
     std::shared_ptr<arrow::Schema> schema;
-    
+    arrow::NumericBuilder<arrow::Int32Type> builder;
+    std::vector<std::shared_ptr<arrow::Array>> arrays;
+
     std::string base_path;
+
+    int32_t** data = nullptr;
 
     arrow::Status PrepareFS() {
         char setup_path[256];
@@ -67,16 +71,45 @@ class ArrowDataWriter {
         return true;
     } 
 
+    std::vector<int32_t> Transparent(int32_t** arr, int chan_num, int points_cnt) {
+        std::vector<int32_t> res(points_cnt);
+        for (int i = 0; i < points_cnt; ++i) {
+            if (arr[i][0] == INT32_MAX && arr[i][1] == INT32_MAX) {
+                res.resize(i -1);
+                return res;
+            }
+            
+            res[i] = arr[i][chan_num];
+        }
+        return res;
+    }
+
     //превращает числовой вектор в табличку, которую можно будет записать
+    // data = [ кол-во_каналов x кол-во точек ]
     std::shared_ptr<arrow::Table> MakeTable(std::vector<std::vector<int32_t>>& data) {
         if(!PrepareData(data))
             return nullptr;
 
-        std::vector<std::shared_ptr<arrow::Array>> arrays(data.size());
-        arrow::NumericBuilder<arrow::Int32Type> builder;
+        // arrays.clear();
+        // arrays.resize(data.size());
 
         for (int i = 0; i < arrays.size(); ++i) {
             builder.AppendValues(data[i]);
+            builder.Finish(&arrays[i]);
+            builder.Reset();
+        }
+
+        return arrow::Table::Make(schema, arrays);
+    }
+
+    // data = [ кол-во точек x кол-во_каналов ]
+    std::shared_ptr<arrow::Table> MakeTable(int32_t** data, int points_count, int channels_count) {
+
+        if (arrays.size() != channels_count) 
+            arrays.resize(channels_count);
+
+        for (int i = 0; i < channels_count; ++i) {
+            builder.AppendValues(Transparent(data, i, points_count));
             builder.Finish(&arrays[i]);
             builder.Reset();
         }
@@ -133,6 +166,12 @@ public:
     arrow::Status Write(std::vector<std::vector<int32_t>>& data, int64_t chunk_size = 67108864L) {
         ARROW_RETURN_NOT_OK(Write(*MakeTable(data).get(), chunk_size));
         POINTS_WRITED += data[0].size();
+        return arrow::Status::OK();
+    }
+
+    arrow::Status Write(int32_t** data, int x_length, int y_length, int64_t chunk_size = 67108864L) {
+        ARROW_RETURN_NOT_OK(Write(*MakeTable(data, x_length, y_length).get(), chunk_size));
+        // POINTS_WRITED += data[0].size();
         return arrow::Status::OK();
     }
 };

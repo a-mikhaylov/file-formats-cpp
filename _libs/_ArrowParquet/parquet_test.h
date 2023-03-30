@@ -34,8 +34,8 @@ void LogWriteResult(std::ofstream& log_out, int step_num, int quant_size,
             << "\tQuant     = " << quant_size << std::endl
             << "\tFile size = " << parquet_size << std::endl
             << std::endl
-            << "\t bin     --> parquet time = " << b_p_time << "c" << std::endl
-            << "\t parquet --> bin     time = " << p_b_time << "c" << std::endl << std::endl
+            << "\tbin     --> parquet time = " << b_p_time << "c" << std::endl
+            << "\tparquet --> bin     time = " << p_b_time << "c" << std::endl << std::endl
             << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
 }
 
@@ -48,14 +48,12 @@ void LogWriteResult(std::ofstream& log_out, int step_num, int quant_size,
 arrow::Status RunMain() {
     int QUANT = 50000;     //сколько точек читать-писать за раз
 
-    std::vector<int> quant_road = { 1000, 10000, 50000, 100000 };
+    std::vector<int> quant_road = { /* 1000, 10000, 50000,  */100000 };
 
     const std::string DATA_OUT_DIR      = "ArrowParquet_RESULT";
-    // const std::string DATA_OUT_NAME     = "/PX1447191017125822-uncomp-50k.parquet";
-    // const std::string REWRITE_FULL_NAME = "./BIN_DATA_rewrite/PX1447191017125822-QUANT-50k.bin";
     const std::string LOG_FILE_NAME     = DATA_OUT_DIR + "/ParquetResults.log";
 
-    std::ofstream log_output(LOG_FILE_NAME);
+    std::ofstream log_output(LOG_FILE_NAME, std::ios::app);
 
     high_resolution_clock::time_point bin_par_start;
     high_resolution_clock::time_point bin_par_stop;
@@ -63,12 +61,14 @@ arrow::Status RunMain() {
     high_resolution_clock::time_point par_bin_start;
     high_resolution_clock::time_point par_bin_stop;
 
-    std::vector<std::vector<int32_t>> dat = { {}, {}, {}, {}, {}, {}, {}, {} };
+    std::vector<std::vector<int32_t>> dat = { {}, {}, {}, {}, {}, {}, {}, {} }; //[8 x QUANT]
     for (int i = 0; i < QUANT; ++i) {
         for (int j = 0; j < dat.size(); ++j) 
             dat[j].push_back(0);
     }
     std::vector<std::vector<int32_t>> dat_2 = dat;
+
+    int32_t** arrayPtr = nullptr; //QUANT x 8
 
     std::shared_ptr<arrow::Schema> schema = arrow::schema(
         {
@@ -96,7 +96,7 @@ arrow::Status RunMain() {
             
             while(BReader.Read(dat))
                 ADWriter.Write(dat, 2048);
-            
+
             bin_par_stop = high_resolution_clock::now();
         }
 
@@ -117,7 +117,7 @@ arrow::Status RunMain() {
         }
         std::cerr << "[INFO]: " << i << " *.parquet --> *.bin - Complited!" << std::endl;
 
-        LogWriteResult(log_output , 0, QUANT, -1, duration_cast<microseconds>(bin_par_stop - bin_par_start).count(),
+        LogWriteResult(log_output , i, QUANT, -1, duration_cast<microseconds>(bin_par_stop - bin_par_start).count(),
                         duration_cast<microseconds>(par_bin_stop - par_bin_start).count());
     
     } //for cycle

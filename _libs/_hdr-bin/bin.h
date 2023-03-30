@@ -15,9 +15,12 @@ class BinReader {
     std::string file_path; //без расширения!
     int         read_write_quant; //кол-во считываемых значений за одиин прогон
     bool        next_stop = false; //если следующего прогона быть не должно - ставим в true
-    int32_t* buf = nullptr; 
+    
+    int32_t*  buf   = nullptr; 
+    int32_t** buf2D = nullptr; //[точка][канал] = значение (read_write_quant x channels_count)
 
     std::ifstream bin_input;
+
     bool PrepareData(std::vector<std::vector<int32_t>>& data) {
         // std::cerr << "::PrepareData()" << std::endl;
         int columns_cnt = channels_count;  //кол-во столбцов, как в hdr
@@ -53,6 +56,14 @@ class BinReader {
             data[i].resize(how_much_save);
     }
 
+    void AlarmBack(int first_empty_idx) {
+        std::cerr << "::AlarmBack(" << first_empty_idx << ")" << std::endl;
+
+        for (int i = first_empty_idx; i < read_write_quant; ++i) 
+            for (int j = 0;  j < channels_count; ++j) 
+                buf2D[i][j] = INT32_MAX; //0x7FFFFFFF
+    }
+
 public:
     void Init(std::string path, int quant) {
         std::cerr << "::Init()" << std::endl;
@@ -71,7 +82,11 @@ public:
         channels_count = hdr.info[0];
         SIZE = channels_count * sizeof(int32_t);
         std::cerr << "\t- Channels count = " << channels_count << std::endl;
+        
         buf = new int32_t[channels_count];
+        
+        buf2D = new int32_t*[read_write_quant];
+        for (int i = 0; i < read_write_quant; ++i) buf2D[i] = new int32_t[channels_count];
     }
 
     BinReader(std::string path, int quant) { Init(path, quant); }
@@ -80,6 +95,13 @@ public:
         std::cerr << "!--Points Readed: " << POINTS_READED << std::endl;
         if (buf != nullptr)
             delete [] buf; 
+
+        if (buf2D != nullptr) {
+            for (int i = 0; i < channels_count; ++i)
+                delete [] buf2D[i];
+            
+            delete [] buf2D; 
+        }
     }
 
     bool Read(std::vector<std::vector<int32_t>>& data) {
@@ -107,6 +129,28 @@ public:
             CutTail(data, i);
 
         // delete [] buf;
+        return true;
+    }
+
+    bool Read(int32_t**& array) {
+        if (next_stop) 
+            return false;
+        
+        int i;
+        for (i = 0; i < read_write_quant; ++i) {
+            bin_input.read((char *)buf2D[i], SIZE);
+            if (bin_input.eof()){
+                next_stop = true;
+                break;
+            }
+            ++POINTS_READED;
+        }
+
+        if (i != read_write_quant)
+            AlarmBack(i);
+
+        array = buf2D;
+
         return true;
     }
 
