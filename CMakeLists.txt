@@ -4,6 +4,7 @@ project(file-formats-cpp
         VERSION 0.1.0)
 set(CMAKE_CXX_STANDARD 11)
 include_directories(${HDF5_INCLUDE_DIRS})
+# include_directories(${CMAKE_SOURCE_DIR}/_DuckDB/)
 # include(CTest)
 # enable_testing()
 
@@ -26,9 +27,11 @@ target_link_libraries(file-formats-cpp Arrow::arrow_shared)
 target_link_libraries(file-formats-cpp Parquet::parquet_shared)
 target_link_libraries(file-formats-cpp ArrowDataset::arrow_dataset_shared)
 
+target_link_libraries(file-formats-cpp ${CMAKE_SOURCE_DIR}/_libs/_DuckDB/libduckdb.so)
+
 # target_link_libraries(file-formats-cpp PRIVATE hdf5::hdf5-static hdf5::hdf5_hl-static)
-
-
+# 
+# 
 # set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 # set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
 # include(CPack)

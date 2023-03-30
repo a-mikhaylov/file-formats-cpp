@@ -120,7 +120,7 @@ public:
         return true;
     }
 
-    //читаем большую пачку в буффер
+    //читаем QUANT точек в буффер
     //выигрыша по времени нет (наверное, можно оптимизировать)
     bool Read2(std::vector<std::vector<int32_t>>& data) {
         if (next_stop) 
