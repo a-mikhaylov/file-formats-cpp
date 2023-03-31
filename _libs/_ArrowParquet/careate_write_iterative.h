@@ -77,7 +77,8 @@ arrow::Status PrepareECGIterateEnv() {
     std::shared_ptr<arrow::fs::FileSystem> setup_fs;
 
     char setup_path[256];
-    char* result = getcwd(setup_path, 256);
+    //Заменить на boost::filesystem
+    char* result = NULL/*  = getcwd(setup_path, 256) */;
     if (result == NULL) {
       return arrow::Status::IOError("Fetching PWD failed.");
     }

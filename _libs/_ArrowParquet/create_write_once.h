@@ -59,7 +59,8 @@ arrow::Status PrepareECGEnv() {
     // Note this operates in the directory the executable is built in.
     char setup_path[512];
     // std::string setup_path = "/media/oldwizzard/kotel/_work/git/file-formats-cpp/build/";
-    char* result = getcwd(setup_path, 512);
+    //Заменить на boost::filesystem
+    char* result = NULL /* = getcwd(setup_path, 512) */;
     if (result == NULL) {
       return arrow::Status::IOError("Fetching PWD failed.");
     }

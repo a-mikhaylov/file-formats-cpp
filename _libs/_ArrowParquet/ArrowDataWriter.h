@@ -2,6 +2,7 @@
 
 #include "include_base_exmpl.h"
 #include "careate_write_iterative.h"
+#include <boost/filesystem.hpp>
 
 #define PARQUET_DATA_DIR   std::string("DataWriter_RESULT")
 #define PARQUET_DATA_FNAME std::string("/Written-ZSTD.parquet")//std::string("/ecg.parquet")
@@ -23,13 +24,12 @@ class ArrowDataWriter {
     int32_t** data = nullptr;
 
     arrow::Status PrepareFS() {
-        char setup_path[256];
-        char* result = getcwd(setup_path, 256);
+        std::string setup_path(boost::filesystem::current_path().c_str());
         
-        if (result == NULL)
-            return arrow::Status::IOError("Fetching PWD failed.");
+        // if (result == NULL)
+            // return arrow::Status::IOError("Fetching PWD failed.");
 
-        ARROW_ASSIGN_OR_RAISE(filesystem, arrow::fs::FileSystemFromUriOrPath(setup_path));
+        ARROW_ASSIGN_OR_RAISE(filesystem, arrow::fs::FileSystemFromUriOrPath(setup_path.c_str()));
         
         return arrow::Status::OK();
     }

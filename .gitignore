@@ -9,11 +9,18 @@ install_manifest.txt
 compile_commands.json
 CTestTestfile.cmake
 _deps
+
+
 # cmake build 
 build/
-
+# vscode dir
 .vscode
 # bin files for write/read
 _data/
 # some examples of realization
 examples/
+
+# parquet data directories
+$Test1_data/
+$Test2_data/
+$Test3_data/

@@ -55,7 +55,8 @@ arrow::Status PrepareEnv() {
     std::shared_ptr<arrow::fs::FileSystem> setup_fs;
     // Note this operates in the directory the executable is built in.
     char setup_path[256];
-    char* result = getcwd(setup_path, 256);
+    //Заменить на boost::filesystem
+    char* result = NULL/*  = getcwd(setup_path, 256) */;
     if (result == NULL) {
       return arrow::Status::IOError("Fetching PWD failed.");
     }
@@ -73,7 +74,8 @@ arrow::Status RunMain_WithSlicing() {
     std::shared_ptr<arrow::fs::FileSystem> fs;
 
     char init_path[256];
-    char* result = getcwd(init_path, 256);
+    //Заменить на boost::filesystem
+    char* result = NULL/* = getcwd(init_path, 256) */;
     if (result == NULL) {
         return arrow::Status::IOError("Fetching PWD failed.");
     }
