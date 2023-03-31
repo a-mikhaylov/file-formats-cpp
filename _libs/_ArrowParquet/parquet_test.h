@@ -63,10 +63,10 @@ arrow::Status RunMain() {
     high_resolution_clock::time_point par_bin_stop;
 
     std::vector<std::vector<int32_t>> dat = { {}, {}, {}, {}, {}, {}, {}, {} }; //[8 x QUANT]
-    for (int i = 0; i < QUANT; ++i) {
+    /* for (int i = 0; i < QUANT; ++i) {
         for (int j = 0; j < dat.size(); ++j) 
             dat[j].push_back(0);
-    }
+    } */
     std::vector<std::vector<int32_t>> dat_2 = dat;
 
     std::shared_ptr<arrow::Schema> schema = arrow::schema(

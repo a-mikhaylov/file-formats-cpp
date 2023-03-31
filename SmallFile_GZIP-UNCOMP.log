@@ -1,0 +1,120 @@
+NODE #0:
+Comment: /small-10000-UNCOMP.parquet
+
+	Quant     = 10000
+	File size = -1
+
+	bin     --> parquet time = 1.4017c
+	parquet --> bin     time = 0.364867c
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+NODE #0:
+Comment: /small-10000-GZIP.parquet
+
+	Quant     = 10000
+	File size = -1
+
+	bin     --> parquet time = 3.78544c
+	parquet --> bin     time = 0.787167c
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+NODE #0:
+Comment: /small-10000-ZSTD.parquet
+
+	Quant     = 10000
+	File size = -1
+
+	bin     --> parquet time = 5.15711c
+	parquet --> bin     time = 1.23024c
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+NODE #0:
+Comment: /small-10000-SNAPPY.parquet
+
+	Quant     = 10000
+	File size = -1
+
+	bin     --> parquet time = 6.26615c
+	parquet --> bin     time = 1.62511c
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+NODE #0:
+Comment: /small-50000-UNCOMP.parquet
+
+	Quant     = 50000
+	File size = -1
+
+	bin     --> parquet time = 7.32926c
+	parquet --> bin     time = 1.95852c
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+NODE #0:
+Comment: /small-50000-GZIP.parquet
+
+	Quant     = 50000
+	File size = -1
+
+	bin     --> parquet time = 9.7682c
+	parquet --> bin     time = 2.28191c
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+NODE #0:
+Comment: /small-50000-ZSTD.parquet
+
+	Quant     = 50000
+	File size = -1
+
+	bin     --> parquet time = 11.0539c
+	parquet --> bin     time = 2.76937c
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+NODE #0:
+Comment: /small-50000-SNAPPY.parquet
+
+	Quant     = 50000
+	File size = -1
+
+	bin     --> parquet time = 12.3188c
+	parquet --> bin     time = 3.20071c
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+NODE #0:
+Comment: /small-100000-UNCOMP.parquet
+
+	Quant     = 100000
+	File size = -1
+
+	bin     --> parquet time = 13.4236c
+	parquet --> bin     time = 3.56783c
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+NODE #0:
+Comment: /small-100000-GZIP.parquet
+
+	Quant     = 100000
+	File size = -1
+
+	bin     --> parquet time = 15.8956c
+	parquet --> bin     time = 3.94866c
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+NODE #0:
+Comment: /small-100000-ZSTD.parquet
+
+	Quant     = 100000
+	File size = -1
+
+	bin     --> parquet time = 17.1797c
+	parquet --> bin     time = 4.35159c
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+NODE #0:
+Comment: /small-100000-SNAPPY.parquet
+
+	Quant     = 100000
+	File size = -1
+
+	bin     --> parquet time = 18.457c
+	parquet --> bin     time = 4.76394c
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
