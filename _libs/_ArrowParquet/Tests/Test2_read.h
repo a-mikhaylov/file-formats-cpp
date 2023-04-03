@@ -8,10 +8,10 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-int test_ns::Test1_write(std::vector<int> quants, std::vector<arrow::Compression::type> compressions)
+int test_ns::Test2_read(std::vector<int> quants, std::vector<arrow::Compression::type> compressions)
 {
     std::string cur_path(boost::filesystem::current_path().c_str());
-    std::cerr << "[TEST]: test_ns::Test1_write() - STARTED: "
+    std::cerr << "[TEST]: test_ns::Test2_read() - STARTED: "
               << cur_path << std::endl << std::endl;
     
     const std::string data_dir    = cur_path + test_ns::TEST1_DATA_DIR; //директория для вывода
@@ -43,11 +43,11 @@ int test_ns::Test1_write(std::vector<int> quants, std::vector<arrow::Compression
     float bin_par_time = 0;
     float par_bin_time = 0;
 
-    std::ofstream log_output("../Logs/Test1_write.log", std::ios::app);
+    std::ofstream log_output("../Logs/Test2_read.log", std::ios::app);
 
     std::string file_title;
     int which_file = -1; //определять, имя какого файл сейчас писать
-    int writeParts = 0;  //количество кусков при записи
+    int readParts  = 0;  //количество кусков при чтении
 
     for (std::string file : files) {
         ++which_file;
@@ -61,33 +61,33 @@ int test_ns::Test1_write(std::vector<int> quants, std::vector<arrow::Compression
 
                 std::cerr << GenerateParquetName(file, QUANT, compr) << std::endl;
 
-                //Запись из *.bin в *.parquet
-                { 
-                    BinReader BReader{file, QUANT};
-                    ArrowDataWriter ADWriter{"", data_dir, GenerateParquetName(file_title, QUANT, compr),
-                                            schema, compr};
-                    
-                    while(BReader.Read(dat)) {
+                {
+                    ArrowDataReader ADReader{data_dir + GenerateParquetName(file_title, QUANT, compr)};
+                    // BinWriter       BWriter{data_dir + GenerateBinName(file_title, QUANT, compr)};
+                    bool need_go = true;
+                    while(true) {
                         tmp_start = high_resolution_clock::now();
-                            ADWriter.Write(dat, 2048);
+                            need_go = ADReader.Read(dat);
                         tmp_stop = high_resolution_clock::now();
-                        ++writeParts;
-                        UpdateTime(bin_par_time, tmp_start, tmp_stop);
+                        UpdateTime(par_bin_time, tmp_start, tmp_stop);
+                        
+                        if (!need_go)
+                            break;
+                        // BWriter.Write(dat);
+                        ++readParts;
                     }
                 }
-
-                std::cerr << "[INFO]: *.bin --> *.parquet - Complited!" << std::endl;
-                
-                debug_set::LogWriteResultWrite(log_output , 0, QUANT, -1, 
-                                            bin_par_time, writeParts,
+                std::cerr << "[INFO]: *.parquet --> *.bin - Complited!" << std::endl << std::endl;
+ 
+                debug_set::LogWriteResultRead(log_output , 0, QUANT, -1, 
+                                            par_bin_time, readParts,
                                             GenerateParquetName(file_title, QUANT, compr));
 
                 ResetTime(bin_par_time, par_bin_time);
-                writeParts = 0;
+                readParts = 0;
             }
         }
     }
 
     return 0;
 }
-

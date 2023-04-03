@@ -1,0 +1,261 @@
+NODE #0:
+Comment: /small-1000-UNCOMP.parquet
+
+	Quant     = 1000
+	File size = -1
+
+	WRITE     time = 2.11323c
+	Avg_quant time =  0.00211112c
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+NODE #0:
+Comment: /small-1000-GZIP.parquet
+
+	Quant     = 1000
+	File size = -1
+
+	WRITE     time = 3.88253c
+	Avg_quant time =  0.00387865c
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+NODE #0:
+Comment: /small-1000-ZSTD.parquet
+
+	Quant     = 1000
+	File size = -1
+
+	WRITE     time = 2.56268c
+	Avg_quant time =  0.00256012c
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+NODE #0:
+Comment: /small-1000-SNAPPY.parquet
+
+	Quant     = 1000
+	File size = -1
+
+	WRITE     time = 2.25663c
+	Avg_quant time =  0.00225437c
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+NODE #0:
+Comment: /small-10000-UNCOMP.parquet
+
+	Quant     = 10000
+	File size = -1
+
+	WRITE     time = 1.3004c
+	Avg_quant time =  0.0128752c
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+NODE #0:
+Comment: /small-10000-GZIP.parquet
+
+	Quant     = 10000
+	File size = -1
+
+	WRITE     time = 2.3902c
+	Avg_quant time =  0.0236654c
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+NODE #0:
+Comment: /small-10000-ZSTD.parquet
+
+	Quant     = 10000
+	File size = -1
+
+	WRITE     time = 1.45642c
+	Avg_quant time =  0.01442c
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+NODE #0:
+Comment: /small-10000-SNAPPY.parquet
+
+	Quant     = 10000
+	File size = -1
+
+	WRITE     time = 1.2022c
+	Avg_quant time =  0.0119029c
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+NODE #0:
+Comment: /small-50000-UNCOMP.parquet
+
+	Quant     = 50000
+	File size = -1
+
+	WRITE     time = 1.28435c
+	Avg_quant time =  0.0611596c
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+NODE #0:
+Comment: /small-50000-GZIP.parquet
+
+	Quant     = 50000
+	File size = -1
+
+	WRITE     time = 2.1515c
+	Avg_quant time =  0.102453c
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+NODE #0:
+Comment: /small-50000-ZSTD.parquet
+
+	Quant     = 50000
+	File size = -1
+
+	WRITE     time = 1.27364c
+	Avg_quant time =  0.0606495c
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+NODE #0:
+Comment: /small-50000-SNAPPY.parquet
+
+	Quant     = 50000
+	File size = -1
+
+	WRITE     time = 1.23973c
+	Avg_quant time =  0.059035c
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+NODE #0:
+Comment: /small-100000-UNCOMP.parquet
+
+	Quant     = 100000
+	File size = -1
+
+	WRITE     time = 1.2581c
+	Avg_quant time =  0.114373c
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+NODE #0:
+Comment: /small-100000-GZIP.parquet
+
+	Quant     = 100000
+	File size = -1
+
+	WRITE     time = 2.36323c
+	Avg_quant time =  0.214839c
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+NODE #0:
+Comment: /small-100000-ZSTD.parquet
+
+	Quant     = 100000
+	File size = -1
+
+	WRITE     time = 1.32406c
+	Avg_quant time =  0.120369c
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+NODE #0:
+Comment: /small-100000-SNAPPY.parquet
+
+	Quant     = 100000
+	File size = -1
+
+	WRITE     time = 1.16514c
+	Avg_quant time =  0.105922c
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+NODE #0:
+Comment: /big-1000-UNCOMP.parquet
+
+	Quant     = 1000
+	File size = -1
+
+	WRITE     time = 120.144c
+	Avg_quant time =  0.00199349c
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+NODE #0:
+Comment: /big-1000-GZIP.parquet
+
+	Quant     = 1000
+	File size = -1
+
+	WRITE     time = 214.524c
+	Avg_quant time =  0.00355951c
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+NODE #0:
+Comment: /big-1000-ZSTD.parquet
+
+	Quant     = 1000
+	File size = -1
+
+	WRITE     time = 140.858c
+	Avg_quant time =  0.0023372c
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+NODE #0:
+Comment: /big-1000-SNAPPY.parquet
+
+	Quant     = 1000
+	File size = -1
+
+	WRITE     time = 122.021c
+	Avg_quant time =  0.00202464c
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+NODE #0:
+Comment: /big-10000-UNCOMP.parquet
+
+	Quant     = 10000
+	File size = -1
+
+	WRITE     time = 68.1692c
+	Avg_quant time =  0.0113106c
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+NODE #0:
+Comment: /big-10000-GZIP.parquet
+
+	Quant     = 10000
+	File size = -1
+
+	WRITE     time = 144.105c
+	Avg_quant time =  0.0239099c
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+NODE #0:
+Comment: /big-10000-ZSTD.parquet
+
+	Quant     = 10000
+	File size = -1
+
+	WRITE     time = 88.4985c
+	Avg_quant time =  0.0146837c
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+NODE #0:
+Comment: /big-10000-SNAPPY.parquet
+
+	Quant     = 10000
+	File size = -1
+
+	WRITE     time = 73.3275c
+	Avg_quant time =  0.0121665c
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+NODE #0:
+Comment: /big-50000-UNCOMP.parquet
+
+	Quant     = 50000
+	File size = -1
+
+	WRITE     time = 69.2209c
+	Avg_quant time =  0.0573971c
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+NODE #0:
+Comment: /big-50000-GZIP.parquet
+
+	Quant     = 50000
+	File size = -1
+
+	WRITE     time = 133.75c
+	Avg_quant time =  0.110904c
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+NODE #0:
+Comment: /big-50000-ZSTD.parquet
+
+	Quant     = 50000
+	File size = -1
+
+	WRITE     time = 81.6824c
+	Avg_quant time =  0.06773c
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+NODE #0:
+Comment: /big-50000-SNAPPY.parquet
+
+	Quant     = 50000
+	File size = -1
+
+	WRITE     time = 71.1008c
+	Avg_quant time =  0.0589559c
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+NODE #0:
+Comment: /big-100000-UNCOMP.parquet
+
+	Quant     = 100000
+	File size = -1
+
+	WRITE     time = 70.0539c
+	Avg_quant time =  0.116176c
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

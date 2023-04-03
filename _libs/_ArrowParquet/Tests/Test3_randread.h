@@ -8,10 +8,11 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-int test_ns::Test1_write(std::vector<int> quants, std::vector<arrow::Compression::type> compressions)
+int test_ns::Test3_randread(std::vector<int> quants, std::vector<arrow::Compression::type> compressions,
+                            std::vector<std::pair<int, int>> readParts /* { (x0; len), ... } */)
 {
     std::string cur_path(boost::filesystem::current_path().c_str());
-    std::cerr << "[TEST]: test_ns::Test1_write() - STARTED: "
+    std::cerr << "[TEST]: Test_ns::Test1_Write() - STARTED: "
               << cur_path << std::endl << std::endl;
     
     const std::string data_dir    = cur_path + test_ns::TEST1_DATA_DIR; //директория для вывода
@@ -43,51 +44,12 @@ int test_ns::Test1_write(std::vector<int> quants, std::vector<arrow::Compression
     float bin_par_time = 0;
     float par_bin_time = 0;
 
-    std::ofstream log_output("../Logs/Test1_write.log", std::ios::app);
+    std::ofstream log_output("../Logs/Test2_read.log", std::ios::app);
 
     std::string file_title;
     int which_file = -1; //определять, имя какого файл сейчас писать
+    int readParts  = 0;  //количество кусков при чтении
     int writeParts = 0;  //количество кусков при записи
-
-    for (std::string file : files) {
-        ++which_file;
-        for (int QUANT : quants) {
-            for (arrow::Compression::type compr : compressions) { 
-                
-                if      (which_file == 0)
-                    file_title = "small";
-                else if (which_file == 1)
-                    file_title = "big";
-
-                std::cerr << GenerateParquetName(file, QUANT, compr) << std::endl;
-
-                //Запись из *.bin в *.parquet
-                { 
-                    BinReader BReader{file, QUANT};
-                    ArrowDataWriter ADWriter{"", data_dir, GenerateParquetName(file_title, QUANT, compr),
-                                            schema, compr};
-                    
-                    while(BReader.Read(dat)) {
-                        tmp_start = high_resolution_clock::now();
-                            ADWriter.Write(dat, 2048);
-                        tmp_stop = high_resolution_clock::now();
-                        ++writeParts;
-                        UpdateTime(bin_par_time, tmp_start, tmp_stop);
-                    }
-                }
-
-                std::cerr << "[INFO]: *.bin --> *.parquet - Complited!" << std::endl;
-                
-                debug_set::LogWriteResultWrite(log_output , 0, QUANT, -1, 
-                                            bin_par_time, writeParts,
-                                            GenerateParquetName(file_title, QUANT, compr));
-
-                ResetTime(bin_par_time, par_bin_time);
-                writeParts = 0;
-            }
-        }
-    }
 
     return 0;
 }
-

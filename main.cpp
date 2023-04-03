@@ -10,12 +10,18 @@
 
 int main() {
     return test_ns::Test1_write(
-        {10000, 50000, 100000}, 
+        {
+            1000,
+            10000, 
+            50000, 
+            100000
+        }, 
         {
             arrow::Compression::type::UNCOMPRESSED, 
             arrow::Compression::type::GZIP,
             arrow::Compression::type::ZSTD,
             arrow::Compression::type::SNAPPY
-        });
+        }
+    );
     // return _parquetMain();
 }
