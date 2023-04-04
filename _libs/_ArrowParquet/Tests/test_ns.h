@@ -14,5 +14,5 @@ namespace test_ns {
     //Объём файла + время (только!) записи + кол-во блоков записи
     int Test1_write(std::vector<int> quants, std::vector<arrow::Compression::type> compressions);
     int Test2_read(std::vector<int> quants, std::vector<arrow::Compression::type> compressions); 
-    int Test3_randread(std::vector<int> quants, std::vector<arrow::Compression::type> compressions, std::vector<std::pair<int, int>> readParts);
+    int Test3_randread(std::vector<int> quants, std::vector<arrow::Compression::type> compressions, std::vector<std::pair<int, int>> toRead);
 }

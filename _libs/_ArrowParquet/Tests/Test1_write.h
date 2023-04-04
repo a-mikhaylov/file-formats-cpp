@@ -69,7 +69,7 @@ int test_ns::Test1_write(std::vector<int> quants, std::vector<arrow::Compression
                     
                     while(BReader.Read(dat)) {
                         tmp_start = high_resolution_clock::now();
-                            ADWriter.Write(dat, 2048);
+                            ADWriter.Write(dat);
                         tmp_stop = high_resolution_clock::now();
                         ++writeParts;
                         UpdateTime(bin_par_time, tmp_start, tmp_stop);
@@ -82,8 +82,8 @@ int test_ns::Test1_write(std::vector<int> quants, std::vector<arrow::Compression
                                             bin_par_time, writeParts,
                                             GenerateParquetName(file_title, QUANT, compr));
 
-                ResetTime(bin_par_time, par_bin_time);
-                writeParts = 0;
+                ResetTime(bin_par_time, par_bin_time); 
+                writeParts = 0;                        
             }
         }
     }

@@ -17,9 +17,6 @@ namespace debug_set {
                 << std::endl
                 << "\tWRITE     time = " << bin_parquet_time << "c" << std::endl
                 << "\tAvg_quant time =  " << bin_parquet_time / (float)write_parts << "c" << std::endl
-                /* << std::endl
-                << "\tparquet --> bin     time = " << parquet_bin_time << "c" << std::endl
-                << "\tAvg read time =  " << parquet_bin_time / (float)read_parts << "c" << std::endl */
                 << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
     }
 
@@ -30,13 +27,16 @@ namespace debug_set {
                 << "Comment: " << comment << std::endl << std::endl
                 << "\tQuant     = " << quant_size << std::endl
                 << "\tFile size = " << parquet_size << std::endl
-                /* << std::endl
-                << "\tWRITE     time = " << bin_parquet_time << "c" << std::endl
-                << "\tAvg_quant time =  " << bin_parquet_time / (float)write_parts << "c" << std::endl*/
                 << std::endl
                 << "\tREAD      time = " << parquet_bin_time << "c" << std::endl
                 << "\tAvg_quant time =  " << parquet_bin_time / (float)read_parts << "c" << std::endl
                 << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
+    }
+
+    void PrintVector(std::string label, std::vector<int> x) {
+        std::cerr << label << std::endl << "\t{ ";
+        for (int i = 0; i < x.size(); ++i) std::cerr << x[i] << ", ";
+        std::cerr << "\b\b }" << std::endl;
     }
 }
 

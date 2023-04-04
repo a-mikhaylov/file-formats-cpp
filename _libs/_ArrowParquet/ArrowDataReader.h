@@ -52,5 +52,15 @@ public:
         // std::cerr << table_readed->ToString();
         return true;
     }
+
+    bool Read(std::vector<std::vector<int32_t>>& dat, std::pair<int, int> to_read) {
+        int RG0  = to_read.first / row_groups_count;     //группа, в которой находится начало отрезка
+        int row0 = to_read.first % row_groups_count;     //строка в группе RG0, являющаяся началом входного отрезка
+
+        int RGk  = to_read.second / row_groups_count;     //группа, в которой находится конец отрезка
+        int rowk = to_read.second % row_groups_count;     //строка в группе RGk, являющаяся концом входного отрезка
+
+        
+    }
  
 };

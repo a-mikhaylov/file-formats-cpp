@@ -8,11 +8,12 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-int test_ns::Test3_randread(std::vector<int> quants, std::vector<arrow::Compression::type> compressions,
-                            std::vector<std::pair<int, int>> readParts /* { (x0; len), ... } */)
+int test_ns::Test3_randread(std::vector<int> quants, 
+                            std::vector<arrow::Compression::type> compressions,
+                            std::vector<std::pair<int, int>> toRead /* { (x0; len), ... } */)
 {
     std::string cur_path(boost::filesystem::current_path().c_str());
-    std::cerr << "[TEST]: Test_ns::Test1_Write() - STARTED: "
+    std::cerr << "[TEST]: Test_ns::Test3_randread() - STARTED: "
               << cur_path << std::endl << std::endl;
     
     const std::string data_dir    = cur_path + test_ns::TEST1_DATA_DIR; //директория для вывода
@@ -44,12 +45,52 @@ int test_ns::Test3_randread(std::vector<int> quants, std::vector<arrow::Compress
     float bin_par_time = 0;
     float par_bin_time = 0;
 
-    std::ofstream log_output("../Logs/Test2_read.log", std::ios::app);
+    std::ofstream log_output("../Logs/Test3_randread.log", std::ios::app);
 
     std::string file_title;
     int which_file = -1; //определять, имя какого файл сейчас писать
-    int readParts  = 0;  //количество кусков при чтении
-    int writeParts = 0;  //количество кусков при записи
+    int readParts = 0;
+
+    for (std::string file : files) {
+        ++which_file;
+        for (int QUANT : quants) {
+            for (arrow::Compression::type compr : compressions) {
+                
+                if      (which_file == 0)
+                    file_title = "small";
+                else if (which_file == 1)
+                    file_title = "big";
+
+                std::cerr << GenerateParquetName(file, QUANT, compr) << std::endl;
+
+                {
+                    ArrowDataReader ADReader{data_dir + GenerateParquetName(file_title, QUANT, compr)};
+                    // BinWriter       BWriter{data_dir + GenerateBinName(file_title, QUANT, compr)};
+                    bool need_go = true;
+                    while(true) {
+                        tmp_start = high_resolution_clock::now();
+                            need_go = ADReader.Read(dat);
+                        tmp_stop = high_resolution_clock::now();
+                        UpdateTime(par_bin_time, tmp_start, tmp_stop);
+                        
+                        if (!need_go)
+                            break;
+                        // BWriter.Write(dat);
+                        ++readParts;
+                    }
+                }
+                std::cerr << "[INFO]: *.parquet --> *.bin - Complited!" << std::endl << std::endl;
+ 
+                debug_set::LogWriteResultRead(log_output , 0, QUANT, -1, 
+                                            par_bin_time, readParts,
+                                            GenerateParquetName(file_title, QUANT, compr));
+
+                ResetTime(bin_par_time, par_bin_time);
+                readParts = 0;
+
+            }
+        }
+    }
 
     return 0;
 }

@@ -43,7 +43,7 @@ int test_ns::Test2_read(std::vector<int> quants, std::vector<arrow::Compression:
     float bin_par_time = 0;
     float par_bin_time = 0;
 
-    std::ofstream log_output("../Logs/Test2_read.log", std::ios::app);
+    std::ofstream log_output("../Logs/Test2_read2.log", std::ios::app);
 
     std::string file_title;
     int which_file = -1; //определять, имя какого файл сейчас писать
