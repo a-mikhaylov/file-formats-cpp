@@ -33,6 +33,22 @@ namespace debug_set {
                 << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
     }
 
+    void LogWriteResultRandRead(std::ofstream& log_out, int quant_size, int parquet_size, 
+                                std::vector<float> part_time, std::vector<std::pair<int, int>> parts,
+                                std::string comment = "") 
+    {
+        log_out << "Comment: " << comment << std::endl << std::endl
+                << "\tQuant = " << quant_size << std::endl 
+                << std::endl;
+                
+        for (int i = 0; i < part_time.size(); ++i) {
+            log_out << "\t" << std::to_string(parts[i].first) << " - " <<  std::to_string(parts[i].first + parts[i].second)
+                      << ": " << part_time[i] << "c" << std::endl;
+        }
+
+        log_out << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
+    }
+
     void PrintVector(std::string label, std::vector<int> x) {
         std::cerr << label << std::endl << "\t{ ";
         for (int i = 0; i < x.size(); ++i) std::cerr << x[i] << ",\t";
@@ -99,4 +115,9 @@ void UpdateTime(float& var, high_resolution_clock::time_point& start, high_resol
 void ResetTime(float& var1, float& var2) {
     var1 = 0.0f;
     var2 = 0.0f;
+}
+
+void ResetTime(std::vector<float>& part_time) {
+    for (int i = 0; i < part_time.size(); ++i )
+        part_time[i] = 0;
 }

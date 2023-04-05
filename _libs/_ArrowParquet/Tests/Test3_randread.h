@@ -42,8 +42,9 @@ int test_ns::Test3_randread(std::vector<int> quants,
     high_resolution_clock::time_point tmp_start;
     high_resolution_clock::time_point tmp_stop;
 
-    float bin_par_time = 0;
-    float par_bin_time = 0;
+    // float bin_par_time = 0;
+    // float par_bin_time = 0;
+    std::vector<float> part_time(toRead.size());
 
     std::ofstream log_output("../Logs/Test3_randread.log", std::ios::app);
 
@@ -61,34 +62,34 @@ int test_ns::Test3_randread(std::vector<int> quants,
                 else if (which_file == 1)
                     file_title = "big";
 
-                std::cerr << GenerateParquetName(file, QUANT, compr) << std::endl;
+                std::cerr << data_dir + GenerateParquetName(file_title, QUANT, compr) << std::endl;
 
                 {
                     ArrowDataReader ADReader{data_dir + GenerateParquetName(file_title, QUANT, compr)};
                     // BinWriter       BWriter{data_dir + GenerateBinName(file_title, QUANT, compr)};
                     bool need_go = true;
+                    int i = 0;
                     for (std::pair<int, int> part : toRead) {
                         tmp_start = high_resolution_clock::now();
                             need_go = ADReader.Read(dat, part);
                         tmp_stop = high_resolution_clock::now();
-                        UpdateTime(par_bin_time, tmp_start, tmp_stop);
+                        UpdateTime(part_time[i++], tmp_start, tmp_stop);
                         
                         if (!need_go)
                             break;
+                        // debug_set::PrintVector("my dat:", dat);
 
-                        debug_set::PrintVector("my dat:", dat);
-                        ++readParts;
+                        // ++readParts;
                     }
                 }
                 std::cerr << "[INFO]: *.parquet --> *.bin - Complited!" << std::endl << std::endl;
  
-                debug_set::LogWriteResultRead(log_output , 0, QUANT, -1, 
-                                            par_bin_time, readParts,
-                                            GenerateParquetName(file_title, QUANT, compr));
+                debug_set::LogWriteResultRandRead(log_output, QUANT, -1, 
+                                                  part_time, toRead,
+                                                  GenerateParquetName(file_title, QUANT, compr));
 
-                ResetTime(bin_par_time, par_bin_time);
-                readParts = 0;
-
+                ResetTime(part_time);
+                // readParts = 0;
             }
         }
     }

@@ -91,7 +91,7 @@ public:
  
     //чтение произвольного места (в нужном канале)
     bool Read(std::vector<std::vector<int32_t>>& dat, std::pair<int, int> to_read, int channel) {
-        if (to_read.first < 0 || to_read.second < 0)
+        if (to_read.first < 0 || to_read.second < 0 || channel < 0)
             return false;
             
         dat.clear();
@@ -121,6 +121,11 @@ public:
 
             dat.insert(dat.end(), tmp.begin(), tmp.end());
         }
+
+        if (channel > dat.size() - 1)
+            return false;
+
+        dat = std::vector<std::vector<int32_t>>({dat[channel]});
 
         return true;
     }

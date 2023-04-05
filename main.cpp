@@ -26,10 +26,11 @@ int main() {
 
     return test_ns::Test3_randread(
         {
-           /*  1000,
-            10000, 
-            50000,  */
             10
+            /* 1000,
+            10000, 
+            50000,
+            100000 */
         }, 
         {
             arrow::Compression::type::UNCOMPRESSED
@@ -38,9 +39,9 @@ int main() {
             arrow::Compression::type::SNAPPY */
         },
         {
-            {0,     10},
-            {0, 2},
-            {2, 5}
+            {0,     40},
+            {8, 15}/* ,
+            {100000, 130000} */
         }
     );
 }
