@@ -21,7 +21,7 @@ int test_ns::Test3_randread(std::vector<int> quants,
     const std::string small_fname = cur_path + debug_set::SMALL_FILE; //бинарных исходников
     
     //в перспективе - будет подаваться на вход
-    const std::vector<std::string> files = {small_fname, big_fname};
+    const std::vector<std::string> files = {small_fname/* , big_fname */};
     
     //если это первый запуск - создаем нужную директорию
     mkdir((data_dir).c_str(), 0700);
@@ -67,15 +67,16 @@ int test_ns::Test3_randread(std::vector<int> quants,
                     ArrowDataReader ADReader{data_dir + GenerateParquetName(file_title, QUANT, compr)};
                     // BinWriter       BWriter{data_dir + GenerateBinName(file_title, QUANT, compr)};
                     bool need_go = true;
-                    while(true) {
+                    for (std::pair<int, int> part : toRead) {
                         tmp_start = high_resolution_clock::now();
-                            need_go = ADReader.Read(dat);
+                            need_go = ADReader.Read(dat, part);
                         tmp_stop = high_resolution_clock::now();
                         UpdateTime(par_bin_time, tmp_start, tmp_stop);
                         
                         if (!need_go)
                             break;
-                        // BWriter.Write(dat);
+
+                        debug_set::PrintVector("my dat:", dat);
                         ++readParts;
                     }
                 }

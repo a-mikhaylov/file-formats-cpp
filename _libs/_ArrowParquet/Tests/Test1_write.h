@@ -19,7 +19,7 @@ int test_ns::Test1_write(std::vector<int> quants, std::vector<arrow::Compression
     const std::string small_fname = cur_path + debug_set::SMALL_FILE; //бинарных исходников
     
     //в перспективе - будет подаваться на вход
-    const std::vector<std::string> files = {small_fname, big_fname};
+    const std::vector<std::string> files = {small_fname/* , big_fname */};
     
     //если это первый запуск - создаем нужную директорию
     mkdir((data_dir).c_str(), 0700);

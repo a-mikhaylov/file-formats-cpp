@@ -286,3 +286,30 @@ Comment: /big-100000-SNAPPY.parquet
 	WRITE     time = 18.9939c
 	Avg_quant time =  0.031499c
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+NODE #0:
+Comment: /small-100000-UNCOMP.parquet
+
+	Quant     = 100000
+	File size = -1
+
+	WRITE     time = 0.357013c
+	Avg_quant time =  0.0324557c
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+NODE #0:
+Comment: /big-100000-UNCOMP.parquet
+
+	Quant     = 100000
+	File size = -1
+
+	WRITE     time = 18.4525c
+	Avg_quant time =  0.0306011c
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+NODE #0:
+Comment: /small-10-UNCOMP.parquet
+
+	Quant     = 10
+	File size = -1
+
+	WRITE     time = 165.71c
+	Avg_quant time =  0.00165709c
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

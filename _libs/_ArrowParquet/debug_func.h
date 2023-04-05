@@ -35,8 +35,18 @@ namespace debug_set {
 
     void PrintVector(std::string label, std::vector<int> x) {
         std::cerr << label << std::endl << "\t{ ";
-        for (int i = 0; i < x.size(); ++i) std::cerr << x[i] << ", ";
+        for (int i = 0; i < x.size(); ++i) std::cerr << x[i] << ",\t";
         std::cerr << "\b\b }" << std::endl;
+    }
+
+    void PrintVector(std::string label, std::vector<std::vector<int>> x) {
+        std::cerr << label << std::endl;
+        for (int i = 0; i < x.size(); ++i) {
+            std::cerr << "\t{ ";
+            for (int j = 0; j < x[i].size(); ++j)
+                std::cerr << x[i][j] << ",\t";
+            std::cerr << "\b\b }" << std::endl;
+        }
     }
 }
 
