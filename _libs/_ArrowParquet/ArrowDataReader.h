@@ -8,32 +8,49 @@ class ArrowDataReader {
     std::unique_ptr<parquet::arrow::FileReader>  arrow_reader;
     std::shared_ptr<arrow::Table>                table_readed;
     
-    int row_groups_count;
+    int RG_count;       //количество row_group в файле
+    int Column_count;   //количество колонок в файле
+    int Rows_count;     //количество строк в одной группе
     int current_group;
     
     //https://stackoverflow.com/questions/53347028/how-to-convert-arrowarray-to-stdvector
     void ConvertData(std::vector<std::vector<int32_t>>& dat) {
         //подгоняем под нужный размер (соответствует table_readed)
-        int column_count = table_readed.get()->ColumnNames().size();
-        int row_count    = table_readed.get()->column(0).get()->length();
+        Update();
+        
+        // Column_count = table_readed.get()->ColumnNames().size();
+        // Rows_count   = table_readed.get()->column(0).get()->length();
+        // std::cerr << "::ConvertData: " << std::endl
+        //           << "\tColumns: " << Column_count << std::endl
+        //           << "\tRows:    " << Rows_count << std::endl;
 
-        dat.resize(column_count); 
+        dat.resize(Column_count); 
         for (int i = 0; i < dat.size(); ++i) {
-            dat[i].resize(row_count);
+            dat[i].resize(Rows_count);
             //возможно стоит брать не только 0-й chunk (?)
             auto in32_array = std::static_pointer_cast<arrow::Int32Array>(table_readed.get()->column(i).get()->chunk(0));
-            for (int j = 0; j < row_count; ++j) {
+            for (int j = 0; j < Rows_count; ++j) {
                 dat[i][j] = in32_array->Value(j);
             }
         }
     }
 
+    void Update() {
+        Column_count = table_readed.get()->ColumnNames().size();
+        Rows_count   = table_readed.get()->column(0).get()->length();
+    }
+
 public:
     arrow::Status Init(std::string fname) {
+        if (!std::ifstream(fname).is_open()) {
+            std::cerr << "File doesn't exist" << std::endl;
+            return arrow::Status::OK();
+        }
+
         ARROW_ASSIGN_OR_RAISE(input, arrow::io::ReadableFile::Open(fname));
         ARROW_RETURN_NOT_OK(parquet::arrow::OpenFile(input, arrow::default_memory_pool(), &arrow_reader));
 
-        row_groups_count = arrow_reader->num_row_groups();
+        RG_count = arrow_reader->num_row_groups();
         current_group = 0;
         return arrow::Status::OK();
     }
@@ -41,8 +58,8 @@ public:
     ArrowDataReader(std::string fname) { Init(fname); }
     //чтение следующей по порядку группы строк
     bool Read(std::vector<std::vector<int32_t>>& dat) {
-        if (current_group == row_groups_count) {
-            std::cerr << "Rows Groups in input:" << row_groups_count << std::endl;
+        if (current_group == RG_count) {
+            std::cerr << "Rows Groups in input:" << RG_count << std::endl;
             return false;
         }
         
@@ -61,29 +78,67 @@ public:
         dat.clear();
 
         int x0 = to_read.first;
-        int xk = to_read.first + to_read.second;
+        int xk = to_read.first + to_read.second - 1;
+        
+        //узнаем размерность таблицы
+        arrow_reader->ReadRowGroup(0, &table_readed);
+        Update();
 
-        int RG0  = x0 / row_groups_count;     //группа, в которой находится начало отрезка
-        int row0 = x0 % row_groups_count;     //строка в группе RG0, являющаяся началом входного отрезка
+        int RG0  = x0 / Rows_count;     //группа, в которой находится начало отрезка
+        int row0 = x0 % Rows_count;     //строка в группе RG0, являющаяся началом входного отрезка
 
-        int RGk  = xk / row_groups_count;     //группа, в которой находится конец отрезка
-        int rowk = xk % row_groups_count;     //строка в группе RGk, являющаяся концом входного отрезка
+        int RGk  = xk / Rows_count;     //группа, в которой находится конец отрезка
+        int rowk = xk % Rows_count;     //строка в группе RGk, являющаяся концом входного отрезка
 
         std::vector<std::vector<int32_t>> tmp;
         //читаем все группы, которые находятся в нужном интервале
         for (int group = RG0; group < RGk + 1; ++group) {
+            if (group >= RG_count) {
+                std::cerr << "group > RG_count" << std::endl;
+                return false; 
+            }
+
             arrow_reader->ReadRowGroup(group, &table_readed);
-            ConvertData(tmp);
+            ConvertData(tmp);   //tmp = [8 x 9999]
+    
+            if (group == RGk) {
+                for (int i = 0;  i < tmp.size(); ++i) {
+                    if (rowk + 1 > tmp[i].size()) {
+                        std::cerr << "\t Points: " << x0 << " - " << xk << std::endl
+                                  << "\t rowk > tmp[" << i << "].size() = " << tmp[i].size() << std::endl
+                                  << "\t Rows_count: " << Rows_count << std::endl
+                                  << "\t RG0, row0: " << RG0 << ", " << row0 << std::endl
+                                  << "\t RGk, rowk: " << RGk << ", " << rowk << std::endl;
 
-            if (group == RG0)
-                for (int i = 0;  i < tmp.size(); ++i)
+                        return false;
+                    }
+                    
+                    tmp[i].erase(tmp[i].begin() + rowk + 1, tmp[i].end());
+                }
+            }
+
+            if (group == RG0) {
+                for (int i = 0;  i < tmp.size(); ++i) {
+                    if (row0 > tmp[i].size()) {
+                        std::cerr << "\t Points: " << x0 << " - " << xk << std::endl
+                                  << "\t row0 > tmp[" << i << "].size()" << std::endl
+                                  << "\t RG_count: " << Rows_count << std::endl
+                                  << "\t RG0, row0: " << RG0 << ", " << row0 << std::endl
+                                  << "\t RGk, rowk: " << RGk << ", " << rowk << std::endl;
+                        return false;
+                    }
+                    
                     tmp[i].erase(tmp[i].begin(), tmp[i].begin() + row0);
+                }
+            }
             
-            if (group == RGk)
-                for (int i = 0;  i < tmp.size(); ++i)
-                    tmp[i].erase(tmp[i].begin() + rowk, tmp[i].end());
-
-            dat.insert(dat.end(), tmp.begin(), tmp.end());
+            // std::cerr << "\ttmp.size(): " << tmp.size() << std::endl;
+            if (dat.size() != tmp.size())
+                dat.resize(tmp.size());
+            for (int i = 0; i < dat.size(); ++i)
+                dat[i].insert(dat[i].end(), tmp[i].begin(), tmp[i].end());
+            
+            std::cerr << "\tdat.size(): " << dat.size() << std::endl;
         }
 
         return true;
@@ -99,33 +154,51 @@ public:
         int x0 = to_read.first;
         int xk = to_read.first + to_read.second;
 
-        int RG0  = x0 / row_groups_count;     //группа, в которой находится начало отрезка
-        int row0 = x0 % row_groups_count;     //строка в группе RG0, являющаяся началом входного отрезка
+        int RG0  = x0 / RG_count;     //группа, в которой находится начало отрезка
+        int row0 = x0 % RG_count;     //строка в группе RG0, являющаяся началом входного отрезка
 
-        int RGk  = xk / row_groups_count;     //группа, в которой находится конец отрезка
-        int rowk = xk % row_groups_count;     //строка в группе RGk, являющаяся концом входного отрезка
+        int RGk  = xk / RG_count;     //группа, в которой находится конец отрезка
+        int rowk = xk % RG_count;     //строка в группе RGk, являющаяся концом входного отрезка
 
         std::vector<std::vector<int32_t>> tmp;
         //читаем все группы, которые находятся в нужном интервале
-        for (int group = RG0; group < RGk + 1; ++group) {
+        /*for (int group = RG0; group < RGk + 1; ++group) {
+            if (group >= RG_count) {
+                std::cerr << "group > RG_count" << std::endl;
+                return false; 
+            }
+
             arrow_reader->ReadRowGroup(group, &table_readed);
             ConvertData(tmp);
 
-            if (group == RG0)
-                for (int i = 0;  i < tmp.size(); ++i)
+            if (group == RG0) {
+                for (int i = 0;  i < tmp.size(); ++i) {
+                    if (row0 > tmp[i].size()) {
+                        std::cerr << "row0 > tmp[" << i << "].size()" << std::endl;
+                        return false;
+                    }
                     tmp[i].erase(tmp[i].begin(), tmp[i].begin() + row0);
+                }
+            }
             
-            if (group == RGk)
-                for (int i = 0;  i < tmp.size(); ++i)
+            if (group == RGk) {
+                for (int i = 0;  i < tmp.size(); ++i) {
+                    if (row0 > tmp[i].size()) {
+                        std::cerr << "row0 > tmp[" << i << "].size()" << std::endl;
+                        return false;
+                    }
+
                     tmp[i].erase(tmp[i].begin() + rowk, tmp[i].end());
+                }
+            }
 
             dat.insert(dat.end(), tmp.begin(), tmp.end());
-        }
+        }*/
 
         if (channel > dat.size() - 1)
             return false;
 
-        dat = std::vector<std::vector<int32_t>>({dat[channel]});
+        //dat = std::vector<std::vector<int32_t>>({dat[channel]});
 
         return true;
     }

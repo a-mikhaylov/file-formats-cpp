@@ -37,7 +37,7 @@ int test_ns::Test3_randread(std::vector<int> quants,
             arrow::field("C5L", arrow::int32()),
             arrow::field("C6F", arrow::int32()),
         });
-    std::vector<std::vector<int32_t>> dat(8); //[8 x QUANT]
+    std::vector<std::vector<int32_t>> dat; //[8 x QUANT]
 
     high_resolution_clock::time_point tmp_start;
     high_resolution_clock::time_point tmp_stop;
@@ -65,19 +65,20 @@ int test_ns::Test3_randread(std::vector<int> quants,
                 std::cerr << data_dir + GenerateParquetName(file_title, QUANT, compr) << std::endl;
 
                 {
-                    ArrowDataReader ADReader{data_dir + GenerateParquetName(file_title, QUANT, compr)};
+                   ArrowDataReader ADReader{data_dir + GenerateParquetName(file_title, QUANT, compr)};
                     // BinWriter       BWriter{data_dir + GenerateBinName(file_title, QUANT, compr)};
                     bool need_go = true;
                     int i = 0;
                     for (std::pair<int, int> part : toRead) {
                         tmp_start = high_resolution_clock::now();
-                            need_go = ADReader.Read(dat, part);
+                           need_go = ADReader.Read(dat, part);
                         tmp_stop = high_resolution_clock::now();
-                        UpdateTime(part_time[i++], tmp_start, tmp_stop);
+                        // UpdateTime(part_time[i++], tmp_start, tmp_stop);
                         
                         if (!need_go)
                             break;
-                        // debug_set::PrintVector("my dat:", dat);
+                        debug_set::PrintVector("my dat: " + std::to_string(part.first) + " - "  + 
+                                                            std::to_string(part.first + part.second), dat);
 
                         // ++readParts;
                     }
@@ -88,7 +89,7 @@ int test_ns::Test3_randread(std::vector<int> quants,
                                                   part_time, toRead,
                                                   GenerateParquetName(file_title, QUANT, compr));
 
-                ResetTime(part_time);
+                // ResetTime(part_time);
                 // readParts = 0;
             }
         }
