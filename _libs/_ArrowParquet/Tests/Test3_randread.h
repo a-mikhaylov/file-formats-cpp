@@ -21,7 +21,7 @@ int test_ns::Test3_randread(std::vector<int> quants,
     const std::string small_fname = cur_path + debug_set::SMALL_FILE; //бинарных исходников
     
     //в перспективе - будет подаваться на вход
-    const std::vector<std::string> files = {small_fname/* , big_fname */};
+    const std::vector<std::string> files = {/* small_fname,  */big_fname};
     
     //если это первый запуск - создаем нужную директорию
     mkdir((data_dir).c_str(), 0700);
@@ -46,7 +46,7 @@ int test_ns::Test3_randread(std::vector<int> quants,
     // float par_bin_time = 0;
     std::vector<float> part_time(toRead.size());
 
-    std::ofstream log_output("../Logs/Test3_randread.log", std::ios::app);
+    std::ofstream log_output("../Logs/Test3_randread-big.log", std::ios::app);
 
     std::string file_title;
     int which_file = -1; //определять, имя какого файл сейчас писать
@@ -73,14 +73,14 @@ int test_ns::Test3_randread(std::vector<int> quants,
                         tmp_start = high_resolution_clock::now();
                            need_go = ADReader.Read(dat, part);
                         tmp_stop = high_resolution_clock::now();
-                        // UpdateTime(part_time[i++], tmp_start, tmp_stop);
+                        UpdateTime(part_time[i++], tmp_start, tmp_stop);
                         
                         if (!need_go)
                             break;
-                        debug_set::PrintVector("my dat: " + std::to_string(part.first) + " - "  + 
-                                                            std::to_string(part.first + part.second), dat);
+                        // debug_set::PrintVector("my dat: " + std::to_string(part.first) + " - "  + 
+                                                            // std::to_string(part.first + part.second), dat);
 
-                        // ++readParts;
+                        ++readParts;
                     }
                 }
                 std::cerr << "[INFO]: *.parquet --> *.bin - Complited!" << std::endl << std::endl;
@@ -89,7 +89,8 @@ int test_ns::Test3_randread(std::vector<int> quants,
                                                   part_time, toRead,
                                                   GenerateParquetName(file_title, QUANT, compr));
 
-                // ResetTime(part_time);
+                ResetTime(part_time);
+                // i = 0;
                 // readParts = 0;
             }
         }
