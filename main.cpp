@@ -10,7 +10,14 @@
 
 int main() {
 
-    return test_ns::Test3_randread(
+    std::string inp_fname = "../_data/big_8x60e6.bin";
+
+    int fsz = boost::filesystem::file_size(boost::filesystem::path(boost::filesystem::path::string_type(inp_fname)));
+
+    std::cerr << fsz << std::endl;
+            //   << fsz / 8
+
+    /* return test_ns::Test3_randread(
         {
             1000,
             10000, 
@@ -29,5 +36,5 @@ int main() {
             {80000, 110000},  
             {170000, 210000}
         }   
-    );
+    ); */
 }

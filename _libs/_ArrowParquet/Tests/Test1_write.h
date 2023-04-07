@@ -4,6 +4,7 @@
 #include "../ArrowDataReader.h"
 #include "../ArrowDataWriter.h"
 #include "test_ns.h"
+#include "../../Log/Log.h"
 #include "../debug_func.h"
 #include <sys/stat.h>
 #include <sys/types.h>
