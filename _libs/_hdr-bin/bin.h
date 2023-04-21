@@ -93,6 +93,10 @@ public:
         }
     }
 
+    size_t getChannelsCount() { return channels_count; }
+
+    size_t getPointsCount() { return hdr.start_end[1] - hdr.start_end[0]; }
+
     bool Read(std::vector<std::vector<int32_t>>& data) {
         if (next_stop) 
             return false;

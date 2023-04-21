@@ -7,7 +7,7 @@
 namespace filesys = boost::filesystem;
 
 class FileRunInfo {
-    // std::string file_id;
+    std::string file_id = "";
     int ch_num = 0, all_point = 0;
 
     std::string compression_type = "NONE"; 
@@ -25,6 +25,52 @@ class FileRunInfo {
 public:
 
     FileRunInfo() {}
+
+    bool isEqual(FileRunInfo& other) {
+        if (file_id == other.file_id)
+            return true;
+        return false;
+    }
+
+    //нужно, чтобы совместить информацию с разных тестов, но по 
+    //одному и тому же файлу
+    void Merge(FileRunInfo& other) {
+        if (file_id == "")
+            file_id = other.file_id;
+        if (ch_num == 0)
+            ch_num = other.ch_num;
+        if (all_point == 0)
+            all_point = other.all_point; 
+        if (compression_type == "NONE")
+            compression_type = other.compression_type;
+        if (quant_points == 0)
+            quant_points = other.quant_points; 
+        
+        if (time_write == 0.0f)
+            time_write = other.time_write; 
+        if (time_write_quant == 0.0f)
+            time_write_quant = other.time_write_quant; 
+        if (time_read == 0.0f)
+            time_read = other.time_read; 
+        if (time_read_quant == 0.0f)
+            time_read_quant = other.time_read_quant; 
+        
+        if (file_size_mb == 0.0f)
+            file_size_mb = other.file_size_mb; 
+        if (compressed_file_size_mb == 0.0f)
+            compressed_file_size_mb = other.compressed_file_size_mb; 
+        if (compression_coef == 0.0f)
+            compression_coef = other.compression_coef; 
+
+        if (read_interval_points == 0)
+            read_interval_points = other.read_interval_points; 
+        if (read_interval_time == 0.0f)
+            read_interval_time = other.read_interval_time; 
+    }
+
+    void setFileID(std::string fname) {
+        file_id = fname;
+    }
 
     //параметры записи
     void setInfo(int _ch_num, int _all_point) { ch_num = _ch_num; all_point = _all_point; }
@@ -49,8 +95,12 @@ public:
         quant_points = _quant_points;
     }
 
-    void setWriteTime(float _time_write, float _time_write_quant) {
-        time_write = _time_write; time_write_quant = _time_write_quant;
+    void setWriteTime(float _time_write) {
+        time_write = _time_write; 
+    }
+
+    void setWriteQuantTime(float _time_write_quant) {
+        time_write_quant = _time_write_quant;
     }
 
     void setReadTime(float _time_read, float _time_read_quant) {
@@ -74,7 +124,7 @@ public:
 
     std::string ToString() {
         std::string res;
-        res = std::to_string(ch_num) + "; " + std::to_string(all_point) + "; " + compression_type + "; " +
+        res = file_id + std::to_string(ch_num) + "; " + std::to_string(all_point) + "; " + compression_type + "; " +
               std::to_string(quant_points) + "; " + std::to_string(time_write) + "; " + std::to_string(time_write_quant) +
               "; " + std::to_string(time_read) + "; " + std::to_string(time_read_quant) + "; " + std::to_string(file_size_mb) +
               "; " + std::to_string(compressed_file_size_mb) + "; " + std::to_string(compression_coef) + "; " +
@@ -97,7 +147,7 @@ public:
     void Init(std::string file_name) {
         run_nr = 0;
         fname = file_name;
-        out.open(fname);
+        out.open(fname, std::ios::app);
 
         if (!out.is_open()) {
             std::cerr << "LOG FILE NOT FOUND" << std::endl;
@@ -108,11 +158,27 @@ public:
     Log(std::string file_name) { Init(file_name); }
     Log() { run_nr = 0; }
 
+    void addInfo(FileRunInfo& x) { 
+        for (int i = 0; i < info.size(); ++i) 
+            if (x.isEqual(info[i])) {
+                info[i].Merge(x);
+                return;
+            }
+
+        info.push_back(x); 
+    }
+
+    void Write(int idx) {
+        if (idx < 0 || idx > info.size())
+            return;
+        out << std::to_string(run_nr++) + "; " + info[idx].ToString() << std::endl;
+        info.erase(info.begin() + idx);
+    }
+
+    void Write() { Write(0); }
+
     void Flush() {
-        std::string to_write;
-        for (int i = 0; i < info.size(); ++i) {
-            to_write = std::to_string(run_nr++) + "; " + info[i].ToString();
-            out << to_write << std::endl;
-        }
+        for (int i = 0; i < info.size(); ++i)
+            out << std::to_string(run_nr++) + "; " + info[i].ToString() << std::endl;
     }
 };

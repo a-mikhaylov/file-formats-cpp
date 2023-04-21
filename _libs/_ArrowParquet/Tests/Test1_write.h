@@ -11,6 +11,10 @@
 
 int test_ns::Test1_write(std::vector<int> quants, std::vector<arrow::Compression::type> compressions)
 {
+    //для записи логов:
+    Log test1_Log(debug_set::LOG_FILE);
+    FileRunInfo info;
+
     std::string cur_path(boost::filesystem::current_path().c_str());
     std::cerr << "[TEST]: test_ns::Test1_write() - STARTED: "
               << cur_path << std::endl << std::endl;
@@ -49,16 +53,20 @@ int test_ns::Test1_write(std::vector<int> quants, std::vector<arrow::Compression
     std::string file_title;
     int which_file = -1; //определять, имя какого файл сейчас писать
     int writeParts = 0;  //количество кусков при записи
-
+//------------------------------------------------------------------------------------
     for (std::string file : files) {
         ++which_file;
         for (int QUANT : quants) {
             for (arrow::Compression::type compr : compressions) { 
+
                 
                 if      (which_file == 0)
                     file_title = "small";
                 else if (which_file == 1)
                     file_title = "big";
+
+                info.setFileID(GenerateParquetName(file_title, QUANT, compr));
+                info.setRunSetting(compr, QUANT);
 
                 std::cerr << GenerateParquetName(file, QUANT, compr) << std::endl;
 
@@ -68,6 +76,8 @@ int test_ns::Test1_write(std::vector<int> quants, std::vector<arrow::Compression
                     ArrowDataWriter ADWriter{"", data_dir, GenerateParquetName(file_title, QUANT, compr),
                                             schema, compr};
                     
+                    info.setInfo(BReader.getChannelsCount(), BReader.getPointsCount());
+
                     while(BReader.Read(dat)) {
                         tmp_start = high_resolution_clock::now();
                             ADWriter.Write(dat);
@@ -79,12 +89,17 @@ int test_ns::Test1_write(std::vector<int> quants, std::vector<arrow::Compression
 
                 std::cerr << "[INFO]: *.bin --> *.parquet - Complited!" << std::endl;
                 
+                info.setWriteTime(bin_par_time);
+
                 debug_set::LogWriteResultWrite(log_output , 0, QUANT, -1, 
                                             bin_par_time, writeParts,
                                             GenerateParquetName(file_title, QUANT, compr));
 
                 ResetTime(bin_par_time, par_bin_time); 
-                writeParts = 0;                        
+                writeParts = 0;     
+
+                test1_Log.addInfo(info);
+                info = FileRunInfo();                   
             }
         }
     }
