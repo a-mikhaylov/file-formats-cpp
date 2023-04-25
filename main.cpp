@@ -13,9 +13,11 @@ int main() {
 
     std::vector<int> Quants = {
                                   1000,
+                                  5000,
                                   10000, 
                                   50000,
-                                  100000
+                                  100000, 
+                                  200000
                               };
 
     std::vector<arrow::Compression::type> Compression = {
@@ -25,10 +27,12 @@ int main() {
                                                             arrow::Compression::type::SNAPPY
                                                         };
 
-    std::vector<std::pair<int, int>> Points = {
-                                                  {0, 1000},
-                                                  {0, 50000},
-                                                  {0, 100000}
+    std::vector<std::pair<int, int>> Points = {   
+                                                  {100000, 100},
+                                                  {250000, 1000},
+                                                  {1000, 25000},
+                                                  {1000, 50000},
+                                                  {168000, 100000}
                                               };
 
     test_ns::Test1_write(

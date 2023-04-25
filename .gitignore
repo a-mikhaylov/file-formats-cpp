@@ -25,3 +25,9 @@ $Test1_data/
 $Test2_data/
 $Test3_data/
 $TestLog_data/
+
+# Julia config files
+*.toml
+
+#  directory with images
+Plots/
