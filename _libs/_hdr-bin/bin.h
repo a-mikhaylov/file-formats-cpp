@@ -75,6 +75,10 @@ public:
         for (int i = 0; i < read_write_quant; ++i) buf2D[i] = new int32_t[channels_count];
     }
 
+    std::string getFileName() {
+        return file_path + ".bin";
+    }
+
     BinReader(std::string path, int quant) { Init(path, quant); }
 
     ~BinReader() { 

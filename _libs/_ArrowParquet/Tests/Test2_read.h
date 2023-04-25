@@ -8,18 +8,20 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-int test_ns::Test2_read(std::vector<int> quants, std::vector<arrow::Compression::type> compressions)
+int test_ns::Test2_read(Log& test_Log, std::vector<int> quants, std::vector<arrow::Compression::type> compressions)
 {
+    FileRunInfo info;
+
     std::string cur_path(boost::filesystem::current_path().c_str());
     std::cerr << "[TEST]: test_ns::Test2_read() - STARTED: "
               << cur_path << std::endl << std::endl;
     
-    const std::string data_dir    = cur_path + test_ns::TEST1_DATA_DIR; //директория для вывода
+    const std::string data_dir    = cur_path + test_ns::TESTLOG_DATA_DIR; //директория для вывода
     const std::string big_fname   = cur_path + debug_set::BIG_FILE;   //текущее расположение
     const std::string small_fname = cur_path + debug_set::SMALL_FILE; //бинарных исходников
     
     //в перспективе - будет подаваться на вход
-    const std::vector<std::string> files = {small_fname, big_fname};
+    const std::vector<std::string> files = {small_fname/* , big_fname */};
     
     //если это первый запуск - создаем нужную директорию
     mkdir((data_dir).c_str(), 0700);
@@ -59,6 +61,9 @@ int test_ns::Test2_read(std::vector<int> quants, std::vector<arrow::Compression:
                 else if (which_file == 1)
                     file_title = "big";
 
+                info.setFileID(GenerateParquetName(file_title, QUANT, compr));
+                info.setRunSetting(compr, QUANT);
+
                 std::cerr << GenerateParquetName(file, QUANT, compr) << std::endl;
 
                 {
@@ -79,12 +84,17 @@ int test_ns::Test2_read(std::vector<int> quants, std::vector<arrow::Compression:
                 }
                 std::cerr << "[INFO]: *.parquet --> *.bin - Complited!" << std::endl << std::endl;
  
+                info.setReadTime(par_bin_time, par_bin_time / (float)QUANT);
+
                 debug_set::LogWriteResultRead(log_output , 0, QUANT, -1, 
                                             par_bin_time, readParts,
                                             GenerateParquetName(file_title, QUANT, compr));
 
                 ResetTime(bin_par_time, par_bin_time);
                 readParts = 0;
+
+                test_Log.addInfo(info);
+                info.Reset();
             }
         }
     }

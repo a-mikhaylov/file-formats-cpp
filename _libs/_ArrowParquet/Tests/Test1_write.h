@@ -9,17 +9,16 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-int test_ns::Test1_write(std::vector<int> quants, std::vector<arrow::Compression::type> compressions)
+int test_ns::Test1_write(Log& test_Log, std::vector<int> quants, std::vector<arrow::Compression::type> compressions)
 {
     //для записи логов:
-    Log test1_Log(debug_set::LOG_FILE);
     FileRunInfo info;
 
     std::string cur_path(boost::filesystem::current_path().c_str());
     std::cerr << "[TEST]: test_ns::Test1_write() - STARTED: "
               << cur_path << std::endl << std::endl;
     
-    const std::string data_dir    = cur_path + test_ns::TEST1_DATA_DIR; //директория для вывода
+    const std::string data_dir    = cur_path + test_ns::TESTLOG_DATA_DIR; //директория для вывода
     const std::string big_fname   = cur_path + debug_set::BIG_FILE;   //текущее расположение
     const std::string small_fname = cur_path + debug_set::SMALL_FILE; //бинарных исходников
     
@@ -28,6 +27,7 @@ int test_ns::Test1_write(std::vector<int> quants, std::vector<arrow::Compression
     
     //если это первый запуск - создаем нужную директорию
     mkdir((data_dir).c_str(), 0700);
+
     //схема записи столбцов в итоговый файл (может быть изменена)
     std::shared_ptr<arrow::Schema> schema = arrow::schema(
         {
@@ -51,6 +51,8 @@ int test_ns::Test1_write(std::vector<int> quants, std::vector<arrow::Compression
     std::ofstream log_output("../Logs/Test1_write.log", std::ios::app);
 
     std::string file_title;
+    std::string tmp_out_fname;
+    std::string tmp_in_fname;
     int which_file = -1; //определять, имя какого файл сейчас писать
     int writeParts = 0;  //количество кусков при записи
 //------------------------------------------------------------------------------------
@@ -77,7 +79,6 @@ int test_ns::Test1_write(std::vector<int> quants, std::vector<arrow::Compression
                                             schema, compr};
                     
                     info.setInfo(BReader.getChannelsCount(), BReader.getPointsCount());
-
                     while(BReader.Read(dat)) {
                         tmp_start = high_resolution_clock::now();
                             ADWriter.Write(dat);
@@ -85,11 +86,13 @@ int test_ns::Test1_write(std::vector<int> quants, std::vector<arrow::Compression
                         ++writeParts;
                         UpdateTime(bin_par_time, tmp_start, tmp_stop);
                     }
+                    tmp_in_fname  = BReader.getFileName(); 
+                    tmp_out_fname = ADWriter.getFileName();
                 }
-
                 std::cerr << "[INFO]: *.bin --> *.parquet - Complited!" << std::endl;
                 
-                info.setWriteTime(bin_par_time);
+                info.setFilesSizes(tmp_in_fname, tmp_out_fname);
+                info.setWriteTime(bin_par_time, bin_par_time / (float)QUANT);
 
                 debug_set::LogWriteResultWrite(log_output , 0, QUANT, -1, 
                                             bin_par_time, writeParts,
@@ -98,12 +101,12 @@ int test_ns::Test1_write(std::vector<int> quants, std::vector<arrow::Compression
                 ResetTime(bin_par_time, par_bin_time); 
                 writeParts = 0;     
 
-                test1_Log.addInfo(info);
-                info = FileRunInfo();                   
+                test_Log.addInfo(info);
+                info.Reset();                   
             }
         }
     }
-
+    // test_Log.Flush();
     return 0;
 }
 

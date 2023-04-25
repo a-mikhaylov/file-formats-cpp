@@ -20,6 +20,7 @@ class ArrowDataWriter {
     std::vector<std::shared_ptr<arrow::Array>> arrays;
 
     std::string base_path;
+    std::string data_fname;
 
     int32_t** data = nullptr;
 
@@ -127,12 +128,13 @@ public:
     {
         ARROW_RETURN_NOT_OK(PrepareFS());
 
-        base_path = root_path + DATA_DIR;
+        base_path  = root_path + DATA_DIR;
+        data_fname = DATA_FNAME;
         schema  = rule_schema;
 
         ARROW_RETURN_NOT_OK(filesystem->CreateDir(base_path));
         
-        ARROW_ASSIGN_OR_RAISE(output, arrow::io::FileOutputStream::Open(base_path + DATA_FNAME));
+        ARROW_ASSIGN_OR_RAISE(output, arrow::io::FileOutputStream::Open(base_path + data_fname));
 
         std::shared_ptr<WriterProperties> props =
             WriterProperties::Builder().compression(CompressType)->build();
@@ -157,6 +159,11 @@ public:
     ~ArrowDataWriter() {
         std::cerr << "!--Points Writed: " << POINTS_WRITED << std::endl;
     }
+
+    std::string getFileName() {
+        return base_path + data_fname;
+    }
+
     //запись данных в текущий файл
     arrow::Status Write(const arrow::Table &table, int64_t chunk_size = 67108864L) {
         ARROW_RETURN_NOT_OK(file_writer->WriteTable(table, chunk_size));

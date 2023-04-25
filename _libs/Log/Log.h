@@ -32,6 +32,23 @@ public:
         return false;
     }
 
+    void Reset() {
+        file_id = "";
+        ch_num = 0, all_point = 0;
+
+        compression_type = "NONE"; 
+        quant_points = 0;
+
+        time_write = 0.0f, time_write_quant = 0.0f;
+        time_read = 0.0f, time_read_quant = 0.0f;
+        
+        file_size_mb = 0.0f, compressed_file_size_mb = 0.0f; 
+        compression_coef = 0.0f; 
+        
+        read_interval_points = 0;
+        read_interval_time = 0.0f;
+    }
+
     //нужно, чтобы совместить информацию с разных тестов, но по 
     //одному и тому же файлу
     void Merge(FileRunInfo& other) {
@@ -95,12 +112,8 @@ public:
         quant_points = _quant_points;
     }
 
-    void setWriteTime(float _time_write) {
-        time_write = _time_write; 
-    }
-
-    void setWriteQuantTime(float _time_write_quant) {
-        time_write_quant = _time_write_quant;
+    void setWriteTime(float _time_write, float _time_write_quant) {
+        time_write = _time_write;  time_write_quant = _time_write_quant;
     }
 
     void setReadTime(float _time_read, float _time_read_quant) {
@@ -124,7 +137,7 @@ public:
 
     std::string ToString() {
         std::string res;
-        res = file_id + std::to_string(ch_num) + "; " + std::to_string(all_point) + "; " + compression_type + "; " +
+        res = file_id + "; " + std::to_string(ch_num) + "; " + std::to_string(all_point) + "; " + compression_type + "; " +
               std::to_string(quant_points) + "; " + std::to_string(time_write) + "; " + std::to_string(time_write_quant) +
               "; " + std::to_string(time_read) + "; " + std::to_string(time_read_quant) + "; " + std::to_string(file_size_mb) +
               "; " + std::to_string(compressed_file_size_mb) + "; " + std::to_string(compression_coef) + "; " +
@@ -141,6 +154,14 @@ class Log {
     std::vector<FileRunInfo> info;
 
     int run_nr; //номер записи
+
+    void printTitle() {
+        out << "run_nr; file_id; ch_num; all_points; compresion_type; " 
+            << "quant_points; time_write; time_write_quant; time_read; " 
+            << "time_read_quant; file_size_mb; compressed_file_size_mb; "
+            << "compression_coef; read_interval_points; read_interval_time" 
+            << std::endl;
+    }
 
 public:
 
@@ -171,6 +192,9 @@ public:
     void Write(int idx) {
         if (idx < 0 || idx > info.size())
             return;
+        if (run_nr == 0)
+            printTitle();
+            
         out << std::to_string(run_nr++) + "; " + info[idx].ToString() << std::endl;
         info.erase(info.begin() + idx);
     }
@@ -178,7 +202,7 @@ public:
     void Write() { Write(0); }
 
     void Flush() {
-        for (int i = 0; i < info.size(); ++i)
-            out << std::to_string(run_nr++) + "; " + info[i].ToString() << std::endl;
+        while(info.size() > 0)
+            Write(0);
     }
 };

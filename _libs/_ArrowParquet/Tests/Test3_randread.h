@@ -8,10 +8,12 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-int test_ns::Test3_randread(std::vector<int> quants, 
+int test_ns::Test3_randread(Log& test_Log, std::vector<int> quants, 
                             std::vector<arrow::Compression::type> compressions,
                             std::vector<std::pair<int, int>> toRead /* { (x0; len), ... } */)
-{
+{   
+    FileRunInfo info;
+
     std::string cur_path(boost::filesystem::current_path().c_str());
     std::cerr << "[TEST]: Test_ns::Test3_randread() - STARTED: "
               << cur_path << std::endl << std::endl;
@@ -84,7 +86,7 @@ int test_ns::Test3_randread(std::vector<int> quants,
                     }
                 }
                 std::cerr << "[INFO]: *.parquet --> *.bin - Complited!" << std::endl << std::endl;
- 
+
                 debug_set::LogWriteResultRandRead(log_output, QUANT, -1, 
                                                   part_time, toRead,
                                                   GenerateParquetName(file_title, QUANT, compr));
