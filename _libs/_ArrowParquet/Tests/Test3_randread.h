@@ -18,12 +18,12 @@ int test_ns::Test3_randread(Log& test_Log, std::vector<int> quants,
     std::cerr << "[TEST]: Test_ns::Test3_randread() - STARTED: "
               << cur_path << std::endl << std::endl;
     
-    const std::string data_dir    = cur_path + test_ns::TEST1_DATA_DIR; //директория для вывода
+    const std::string data_dir    = cur_path + test_ns::TESTLOG_DATA_DIR; //директория для вывода
     const std::string big_fname   = cur_path + debug_set::BIG_FILE;   //текущее расположение
     const std::string small_fname = cur_path + debug_set::SMALL_FILE; //бинарных исходников
     
     //в перспективе - будет подаваться на вход
-    const std::vector<std::string> files = {/* small_fname,  */big_fname};
+    const std::vector<std::string> files = {small_fname/* , big_fname */};
     
     //если это первый запуск - создаем нужную директорию
     mkdir((data_dir).c_str(), 0700);
@@ -64,6 +64,9 @@ int test_ns::Test3_randread(Log& test_Log, std::vector<int> quants,
                 else if (which_file == 1)
                     file_title = "big";
 
+                info.setFileID(GenerateParquetName(file_title, QUANT, compr));
+                info.setRunSetting(compr, QUANT);
+
                 std::cerr << data_dir + GenerateParquetName(file_title, QUANT, compr) << std::endl;
 
                 {
@@ -81,7 +84,8 @@ int test_ns::Test3_randread(Log& test_Log, std::vector<int> quants,
                             break;
                         // debug_set::PrintVector("my dat: " + std::to_string(part.first) + " - "  + 
                                                             // std::to_string(part.first + part.second), dat);
-
+                        info.setIntervalReading(part.second, part_time[i - 1]);
+                        test_Log.addInfo(info);
                         ++readParts;
                     }
                 }
@@ -92,8 +96,8 @@ int test_ns::Test3_randread(Log& test_Log, std::vector<int> quants,
                                                   GenerateParquetName(file_title, QUANT, compr));
 
                 ResetTime(part_time);
-                // i = 0;
-                // readParts = 0;
+                // test_Log.addInfo(info);
+                info.Reset();
             }
         }
     }

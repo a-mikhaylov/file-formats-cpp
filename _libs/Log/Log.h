@@ -32,6 +32,12 @@ public:
         return false;
     }
 
+    bool isTest3() {
+        if (read_interval_points != 0 && read_interval_time != 0.0f)
+            return true;
+        return false;
+    }
+
     void Reset() {
         file_id = "";
         ch_num = 0, all_point = 0;
@@ -135,6 +141,11 @@ public:
         read_interval_time = _read_times;
     }
 
+    void setIntervalReading(FileRunInfo& x) {
+        read_interval_points = x.read_interval_points;
+        read_interval_time = x.read_interval_time;
+    }
+
     std::string ToString() {
         std::string res;
         res = file_id + "; " + std::to_string(ch_num) + "; " + std::to_string(all_point) + "; " + compression_type + "; " +
@@ -180,11 +191,21 @@ public:
     Log() { run_nr = 0; }
 
     void addInfo(FileRunInfo& x) { 
-        for (int i = 0; i < info.size(); ++i) 
+        for (int i = 0; i < info.size(); ++i) {
             if (x.isEqual(info[i])) {
+                if (info[i].isTest3() && x.isTest3()) { //в эту ячейку уже записан один прогон кусочного чтения
+                    info.insert(info.begin() + i, FileRunInfo(info[i]));
+                    info[i + 1].setIntervalReading(x);
+                    return;
+                } if (!info[i].isTest3() && x.isTest3()) {
+                    info[i].setIntervalReading(x);
+                    return;
+                }
+
                 info[i].Merge(x);
                 return;
             }
+        }
 
         info.push_back(x); 
     }
@@ -194,7 +215,7 @@ public:
             return;
         if (run_nr == 0)
             printTitle();
-            
+
         out << std::to_string(run_nr++) + "; " + info[idx].ToString() << std::endl;
         info.erase(info.begin() + idx);
     }
