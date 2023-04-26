@@ -12,12 +12,12 @@ int main() {
     Log test_Log(debug_set::LOG_FILE);
 
     std::vector<int> Quants = {
-                                  1000,
-                                  5000,
-                                  10000, 
-                                  50000,
+                                //   1000,
+                                //   5000,
+                                //   10000, 
+                                //   50000,
                                   100000, 
-                                  200000
+                                //   200000
                               };
 
     std::vector<arrow::Compression::type> Compression = {
@@ -30,6 +30,11 @@ int main() {
     std::vector<std::pair<int, int>> Points = {   
                                                   {100000, 100},
                                                   {250000, 1000},
+                                                  {250000, 1000},
+                                                  {250000, 1000},
+                                                  {0, 1000},
+                                                  {0, 1000},
+                                                  {0, 1000},
                                                   {1000, 25000},
                                                   {1000, 50000},
                                                   {168000, 100000}

@@ -4,7 +4,7 @@
 
 
 namespace debug_set {
-    const std::string LOG_FILE = "../Logs/LogTest1-2-3.csv";
+    const std::string LOG_FILE = "../Logs/LogTestCash.csv";
 
     const std::string BIG_FILE   = "/../_data/big_8x60e6";
     const std::string SMALL_FILE = "/../_data/small_8x1e6";
