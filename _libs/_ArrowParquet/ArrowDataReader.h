@@ -8,10 +8,14 @@ class ArrowDataReader {
     std::unique_ptr<parquet::arrow::FileReader>  arrow_reader;
     std::shared_ptr<arrow::Table>                table_readed;
     
+    std::vector<size_t> shuffle_idx;
+    size_t shuffle_part;
+
     int RG_count;       //количество row_group в файле
     int Column_count;   //количество колонок в файле
     int Rows_count;     //количество строк в одной группе
     int current_group;
+    int need_shuffle = -1;
     
     //https://stackoverflow.com/questions/53347028/how-to-convert-arrowarray-to-stdvector
     void ConvertData(std::vector<std::vector<int32_t>>& dat) {
@@ -38,6 +42,9 @@ class ArrowDataReader {
     void Update() {
         Column_count = table_readed.get()->ColumnNames().size();
         Rows_count   = table_readed.get()->column(0).get()->length();
+        
+        if (need_shuffle != -1)
+            Shuffle(need_shuffle);
     }
 
 public:
@@ -56,11 +63,40 @@ public:
     }
 
     ArrowDataReader(std::string fname) { Init(fname); }
+    
+    //перемешать порядок чтения (весь файл случайными кусками (размер куска на входе))
+    void Shuffle(size_t part_size) {
+        if (need_shuffle == -1)
+            need_shuffle = part_size;
+        else {
+            int parts_count = RG_count * Rows_count / part_size + 1;
+            shuffle_idx.resize(parts_count);
+            
+            for (int i = 0; i < shuffle_idx.size(); ++i)
+                shuffle_idx[i] = i;
+
+            srand(time(NULL));
+            std::random_shuffle(shuffle_idx.begin(), shuffle_idx.end());
+            shuffle_part = part_size;
+            
+            std::cerr << "{ ";
+            for (int i = 0; i < shuffle_idx.size(); ++i)
+                std::cerr << shuffle_idx[i] << ", ";
+            std::cerr << "\b\b }" << std::endl;
+            current_group = 0;
+            need_shuffle = -1;
+        } 
+    }
+
     //чтение следующей по порядку группы строк
     bool Read(std::vector<std::vector<int32_t>>& dat) {
         if (current_group == RG_count) {
             std::cerr << "Rows Groups in input:" << RG_count << std::endl;
             return false;
+        }
+
+        if (shuffle_idx.size() != 0) {
+            return Read(dat, { shuffle_idx[current_group++]*shuffle_part, shuffle_part });
         }
         
         arrow_reader->ReadRowGroup(current_group++, &table_readed);
@@ -104,11 +140,11 @@ public:
             if (group == RGk) {
                 for (int i = 0;  i < tmp.size(); ++i) {
                     if (rowk + 1 > tmp[i].size()) {
-                        std::cerr << "\t Points: " << x0 << " - " << xk << std::endl
+                        /* std::cerr << "\t Points: " << x0 << " - " << xk << std::endl
                                   << "\t rowk > tmp[" << i << "].size() = " << tmp[i].size() << std::endl
                                   << "\t Rows_count: " << Rows_count << std::endl
                                   << "\t RG0, row0: " << RG0 << ", " << row0 << std::endl
-                                  << "\t RGk, rowk: " << RGk << ", " << rowk << std::endl;
+                                  << "\t RGk, rowk: " << RGk << ", " << rowk << std::endl; */
 
                         return false;
                     }
@@ -120,11 +156,11 @@ public:
             if (group == RG0) {
                 for (int i = 0;  i < tmp.size(); ++i) {
                     if (row0 > tmp[i].size()) {
-                        std::cerr << "\t Points: " << x0 << " - " << xk << std::endl
+                        /* std::cerr << "\t Points: " << x0 << " - " << xk << std::endl
                                   << "\t row0 > tmp[" << i << "].size()" << std::endl
                                   << "\t RG_count: " << Rows_count << std::endl
                                   << "\t RG0, row0: " << RG0 << ", " << row0 << std::endl
-                                  << "\t RGk, rowk: " << RGk << ", " << rowk << std::endl;
+                                  << "\t RGk, rowk: " << RGk << ", " << rowk << std::endl; */
                         return false;
                     }
                     

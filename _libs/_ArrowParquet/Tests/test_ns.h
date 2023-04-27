@@ -17,4 +17,5 @@ namespace test_ns {
     int Test1_write(Log& test_Log, std::vector<int> quants, std::vector<arrow::Compression::type> compressions);
     int Test2_read(Log& test_Log, std::vector<int> quants, std::vector<arrow::Compression::type> compressions); 
     int Test3_randread(Log& test_Log, std::vector<int> quants, std::vector<arrow::Compression::type> compressions, std::vector<std::pair<int, int>> toRead);
+    int Test4_shuffle(Log& test_Log, std::vector<int> quants, std::vector<arrow::Compression::type> compressions, std::vector<int> shuffle_parts);
 }
