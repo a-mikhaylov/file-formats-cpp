@@ -54,6 +54,7 @@ int test_ns::Test4_shuffle(Log& test_Log, std::vector<int> quants,
     std::string tmp_in_fname;
     int which_file = -1; //определять, имя какого файл сейчас писать
     int writeParts = 0;  //количество кусков при записи
+    int readParts  = 0;
 //----------------------------------------------------------------------------------
     for (std::string file : files) {
         ++which_file;
@@ -83,12 +84,13 @@ int test_ns::Test4_shuffle(Log& test_Log, std::vector<int> quants,
                             
                             if (!need_go)
                                 break;
+                            ++readParts;
                         }
                     }
                     std::cerr << "[INFO]: *.parquet --> *.bin - Complited!" 
                               << std::endl << std::endl;
     
-                    info.setReadTime(par_bin_time, par_bin_time / (float)QUANT);
+                    info.setReadTime(par_bin_time, par_bin_time / (float)readParts);
                     ResetTime(bin_par_time, par_bin_time);
 
                     test_Log.addInfo(info);

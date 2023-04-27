@@ -45,8 +45,6 @@ int test_ns::Test2_read(Log& test_Log, std::vector<int> quants, std::vector<arro
     float bin_par_time = 0;
     float par_bin_time = 0;
 
-    std::ofstream log_output("../Logs/Test2_read2.log", std::ios::app);
-
     std::string file_title;
     int which_file = -1; //определять, имя какого файл сейчас писать
     int readParts  = 0;  //количество кусков при чтении
@@ -68,7 +66,6 @@ int test_ns::Test2_read(Log& test_Log, std::vector<int> quants, std::vector<arro
 
                 {
                     ArrowDataReader ADReader{data_dir + GenerateParquetName(file_title, QUANT, compr)};
-                    // BinWriter       BWriter{data_dir + GenerateBinName(file_title, QUANT, compr)};
                     bool need_go = true;
                     while(true) {
                         tmp_start = high_resolution_clock::now();
@@ -78,17 +75,12 @@ int test_ns::Test2_read(Log& test_Log, std::vector<int> quants, std::vector<arro
                         
                         if (!need_go)
                             break;
-                        // BWriter.Write(dat);
                         ++readParts;
                     }
                 }
                 std::cerr << "[INFO]: *.parquet --> *.bin - Complited!" << std::endl << std::endl;
  
-                info.setReadTime(par_bin_time, par_bin_time / (float)QUANT);
-
-                debug_set::LogWriteResultRead(log_output , 0, QUANT, -1, 
-                                            par_bin_time, readParts,
-                                            GenerateParquetName(file_title, QUANT, compr));
+                info.setReadTime(par_bin_time, par_bin_time / (float)readParts); //!!!
 
                 ResetTime(bin_par_time, par_bin_time);
                 readParts = 0;

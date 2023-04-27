@@ -5,9 +5,9 @@ using CSV
 
 Big   = "Logs/LogTestBig1-2-3_copy.csv"
 Small = "Logs/LogTest1-2-3_copy2.csv"
-Cash  = "Logs/LogTestCash.csv"
+Shuffle  = "Logs/LogShuffle1k.csv"
 file = "Logs/LogRead.csv"
-df = CSV.File(Big) |> DataFrame
+df = CSV.File(file) |> DataFrame
 
 @df df plot(:time_read, 
             :time_write, 
