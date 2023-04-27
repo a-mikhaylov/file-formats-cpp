@@ -79,7 +79,7 @@ public:
             std::random_shuffle(shuffle_idx.begin(), shuffle_idx.end());
             shuffle_part = part_size;
             
-            std::cerr << "{ ";
+            std::cerr << "\tShuffled: { ";
             for (int i = 0; i < shuffle_idx.size(); ++i)
                 std::cerr << shuffle_idx[i] << ", ";
             std::cerr << "\b\b }" << std::endl;

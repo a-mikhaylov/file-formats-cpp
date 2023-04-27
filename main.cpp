@@ -9,7 +9,7 @@
 // #include "_libs/_DuckDB/duckdb.hpp" // на parquet
 
 int main() {
-    Log test_Log("../Logs/LogShuffle1M.csv"); //debug_set::LOG_FILE
+    Log test_Log("../Logs/LogRead.csv"); //debug_set::LOG_FILE
 
     std::vector<int> Quants = {
           1000,
@@ -41,7 +41,7 @@ int main() {
         {1000, 50000}
     };
 
-    test_ns::Test4_shuffle(
+    /* test_ns::Test4_shuffle(
         test_Log, 
         Quants, 
         Compression,
@@ -50,8 +50,13 @@ int main() {
             1000000
             // 10000
         }
+    ); */
+    test_ns::Test2_read(
+        test_Log, 
+        Quants, 
+        Compression
     );
-
+    
 test_Log.Flush();
 return 0;
 

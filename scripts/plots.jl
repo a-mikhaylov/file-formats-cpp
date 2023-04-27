@@ -6,8 +6,8 @@ using CSV
 Big   = "Logs/LogTestBig1-2-3_copy.csv"
 Small = "Logs/LogTest1-2-3_copy2.csv"
 Cash  = "Logs/LogTestCash.csv"
-Shuffle = "Logs/LogShuffle1M.csv"
-df = CSV.File(Shuffle) |> DataFrame
+file = "Logs/LogRead.csv"
+df = CSV.File(Big) |> DataFrame
 
 @df df plot(:time_read, 
             :time_write, 
@@ -43,10 +43,10 @@ savefig("Plots/BigCompression_coef(quant_points).png")
 
 @df df plot(:read_interval_points, 
             :read_interval_time, 
-            group = :compresion_type, 
+            group = (:compresion_type, :quant_points), 
             xlabel = "Read Interval Points",
-            ylabel = "Read INterval TIme, c",
-            marker = :circle)
+            ylabel = "Read INterval TIme, c")
+            # marker = :circle)
 savefig("Plots/BigRead_interval_time(read_interval_points).png")
 
 @df df plot(:read_interval_points, 
@@ -65,3 +65,11 @@ groupby(df, :compresion_type)
             ylabel = "Time Rand Read, c",
             marker = :circle)
 savefig("Plots/1MSmallRandRead_t(quant_points).png")
+
+@df df plot(:quant_points, 
+            :time_read_quant, 
+            group = :compresion_type, 
+            xlabel = "Quant points",
+            ylabel = "Time Quant Read, c",
+            marker = :circle)
+savefig("Plots/1MSmallQuantRead_t(quant_points).png")
