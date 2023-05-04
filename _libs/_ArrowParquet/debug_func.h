@@ -125,7 +125,7 @@ namespace debug_set {
                 arrow::field("C6F", arrow::int32()),
             });
         std::vector<std::vector<int32_t>> dat(8);
-        const std::string data_dir    = cur_path + test_ns::TESTLOG_DATA_DIR;
+        const std::string data_dir    = cur_path + test_ns::RUN_DATA_DIR;
         ArrowDataReader ADReader{data_dir + GenerateParquetName("small", 10000, 
                                                                 arrow::Compression::type::UNCOMPRESSED)};
 

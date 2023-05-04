@@ -9,21 +9,13 @@
 // #include "_libs/_DuckDB/duckdb.hpp" // на parquet
 
 int main() {
-    Log test_Log("../Logs/LogShuffle1k.csv"); //debug_set::LOG_FILE
+    Log test_Log("../Logs/LogEncode.csv"); //debug_set::LOG_FILE
 
     std::vector<int> Quants = {
           1000,
-          5000,
           10000, 
-          25000,
           50000,
-          65000,
-          80000,
-          100000,
-          125000,
-          150000,
-          175000,
-          200000
+          100000
         };
 
     std::vector<arrow::Compression::type> Compression = {
@@ -41,21 +33,11 @@ int main() {
         {1000, 50000}
     };
 
-    test_ns::Test4_shuffle(
-        test_Log, 
-        Quants, 
-        Compression,
-        { 
-            // 1000,
-            1000
-            // 10000
-        }
-    );
-    /* test_ns::Test2_read(
+    test_ns::Test1_write(
         test_Log, 
         Quants, 
         Compression
-    ); */
+    );
 
 test_Log.Flush();
 return 0;
@@ -78,6 +60,17 @@ return 0;
         Compression,
         Points
     );
+
+    /* test_ns::Test4_shuffle(
+        test_Log, 
+        Quants, 
+        Compression,
+        { 
+            // 1000,
+            1000
+            // 10000
+        }
+    ); */
 
     test_Log.Flush();
 

@@ -7,6 +7,8 @@
 #define PARQUET_DATA_DIR   std::string("DataWriter_RESULT")
 #define PARQUET_DATA_FNAME std::string("/Written-ZSTD.parquet")//std::string("/ecg.parquet")
 
+using parquet::Encoding;
+
 //пока что работает только с int32_t (несложно шаблонизировать)
 class ArrowDataWriter {
     int POINTS_WRITED = 0;
@@ -136,8 +138,12 @@ public:
         
         ARROW_ASSIGN_OR_RAISE(output, arrow::io::FileOutputStream::Open(base_path + data_fname));
 
-        std::shared_ptr<WriterProperties> props =
-            WriterProperties::Builder().compression(CompressType)->build();
+        std::shared_ptr<WriterProperties> props = WriterProperties::Builder()
+            .version(ParquetVersion::PARQUET_2_6)
+            ->compression(CompressType)
+            ->encoding(Encoding::DELTA_BYTE_ARRAY)
+            ->data_page_version(ParquetDataPageVersion::V2)
+            ->build();
 
         ARROW_ASSIGN_OR_RAISE(file_writer, parquet::arrow::FileWriter::Open(*schema,
                                             arrow::default_memory_pool(), output,

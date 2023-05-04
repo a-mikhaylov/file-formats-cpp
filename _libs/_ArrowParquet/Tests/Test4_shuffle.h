@@ -19,7 +19,7 @@ int test_ns::Test4_shuffle(Log& test_Log, std::vector<int> quants,
     std::cerr << "[TEST]: test_ns::Test1_write() - STARTED: "
               << cur_path << std::endl << std::endl;
     
-    const std::string data_dir    = cur_path + test_ns::TESTLOG_DATA_DIR; //директория для вывода
+    const std::string data_dir    = cur_path + test_ns::RUN_DATA_DIR; //директория для вывода
     const std::string big_fname   = cur_path + debug_set::BIG_FILE;   //текущее расположение
     const std::string small_fname = cur_path + debug_set::SMALL_FILE; //бинарных исходников
     
