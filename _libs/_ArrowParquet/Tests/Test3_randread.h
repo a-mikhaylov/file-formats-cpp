@@ -48,8 +48,6 @@ int test_ns::Test3_randread(Log& test_Log, std::vector<int> quants,
     // float par_bin_time = 0;
     std::vector<float> part_time(toRead.size());
 
-    std::ofstream log_output("../Logs/Test3_randread-big.log", std::ios::app);
-
     std::string file_title;
     int which_file = -1; //определять, имя какого файл сейчас писать
     int readParts = 0;
@@ -90,10 +88,6 @@ int test_ns::Test3_randread(Log& test_Log, std::vector<int> quants,
                     }
                 }
                 std::cerr << "[INFO]: *.parquet --> *.bin - Complited!" << std::endl << std::endl;
-
-                debug_set::LogWriteResultRandRead(log_output, QUANT, -1, 
-                                                  part_time, toRead,
-                                                  GenerateParquetName(file_title, QUANT, compr));
 
                 ResetTime(part_time);
                 // test_Log.addInfo(info);

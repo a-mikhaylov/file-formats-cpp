@@ -12,17 +12,17 @@ int main() {
     Log test_Log("../Logs/LogEncode.csv"); //debug_set::LOG_FILE
 
     std::vector<int> Quants = {
-          1000,
-          10000, 
-          50000,
-          100000
+          1024,
+          1024*8, 
+          1024*8*4,
+          1024*8*4*4
         };
 
     std::vector<arrow::Compression::type> Compression = {
         arrow::Compression::type::UNCOMPRESSED,
         arrow::Compression::type::GZIP,
         arrow::Compression::type::ZSTD,
-        arrow::Compression::type::SNAPPY
+        arrow::Compression::type::SNAPPY        
     };
 
     std::vector<std::pair<int, int>> Points = {   
@@ -37,6 +37,12 @@ int main() {
         test_Log, 
         Quants, 
         Compression
+    );//
+
+    test_ns::Test2_read(
+        test_Log, 
+        {1024*8*4*4}, 
+        {arrow::Compression::type::UNCOMPRESSED}
     );
 
 test_Log.Flush();

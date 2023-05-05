@@ -66,6 +66,7 @@ int test_ns::Test2_read(Log& test_Log, std::vector<int> quants, std::vector<arro
 
                 {
                     ArrowDataReader ADReader{data_dir + GenerateParquetName(file_title, QUANT, compr)};
+                    BinWriter BWriter{data_dir + GenerateBinName(file_title, QUANT, compr)};
                     bool need_go = true;
                     while(true) {
                         tmp_start = high_resolution_clock::now();
@@ -75,6 +76,7 @@ int test_ns::Test2_read(Log& test_Log, std::vector<int> quants, std::vector<arro
                         
                         if (!need_go)
                             break;
+                        BWriter.Write(dat);
                         ++readParts;
                     }
                 }

@@ -48,8 +48,6 @@ int test_ns::Test1_write(Log& test_Log, std::vector<int> quants, std::vector<arr
     float bin_par_time = 0;
     float par_bin_time = 0;
 
-    std::ofstream log_output("../Logs/Test1_write.log", std::ios::app);
-
     std::string file_title;
     std::string tmp_out_fname;
     std::string tmp_in_fname;
@@ -93,10 +91,6 @@ int test_ns::Test1_write(Log& test_Log, std::vector<int> quants, std::vector<arr
                 
                 info.setFilesSizes(tmp_in_fname, tmp_out_fname);
                 info.setWriteTime(bin_par_time, bin_par_time / (float)QUANT);
-
-                debug_set::LogWriteResultWrite(log_output , 0, QUANT, -1, 
-                                            bin_par_time, writeParts,
-                                            GenerateParquetName(file_title, QUANT, compr));
 
                 ResetTime(bin_par_time, par_bin_time); 
                 writeParts = 0;     

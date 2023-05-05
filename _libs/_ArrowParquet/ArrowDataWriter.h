@@ -140,9 +140,10 @@ public:
 
         std::shared_ptr<WriterProperties> props = WriterProperties::Builder()
             .version(ParquetVersion::PARQUET_2_6)
-            ->compression(CompressType)
-            ->encoding(Encoding::DELTA_BYTE_ARRAY)
             ->data_page_version(ParquetDataPageVersion::V2)
+            ->compression(CompressType)
+            // ->compression_level(1)
+            ->encoding(Encoding::DELTA_BINARY_PACKED)
             ->build();
 
         ARROW_ASSIGN_OR_RAISE(file_writer, parquet::arrow::FileWriter::Open(*schema,

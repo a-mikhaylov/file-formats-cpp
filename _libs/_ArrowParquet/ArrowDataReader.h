@@ -57,6 +57,8 @@ public:
         ARROW_ASSIGN_OR_RAISE(input, arrow::io::ReadableFile::Open(fname));
         ARROW_RETURN_NOT_OK(parquet::arrow::OpenFile(input, arrow::default_memory_pool(), &arrow_reader));
 
+        // arrow_reader->parquet_reader()->metadata()->
+
         RG_count = arrow_reader->num_row_groups();
         current_group = 0;
         return arrow::Status::OK();
