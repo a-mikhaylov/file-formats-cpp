@@ -6,7 +6,7 @@
 namespace test_ns {
      const std::string TEST1_DATA_DIR = "/../$Test1_data";
      const std::string TESTLOG_DATA_DIR = "/../$TestLog_data";
-     const std::string ENCODE_DATA_DIR = "/../$EncodeDELTA_BIN_PACK_data";
+     const std::string ENCODE_DATA_DIR = "/../$EncodeDELTA_LR_BIN_PACK_data";
 
      const std::string RUN_DATA_DIR = ENCODE_DATA_DIR;
     //тест записи файлов в формат parquet:

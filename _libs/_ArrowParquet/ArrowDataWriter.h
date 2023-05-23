@@ -145,10 +145,18 @@ public:
             // ->compression_level(1)
             ->encoding(Encoding::DELTA_BINARY_PACKED)
             ->build();
+        
+        
 
-        ARROW_ASSIGN_OR_RAISE(file_writer, parquet::arrow::FileWriter::Open(*schema,
-                                            arrow::default_memory_pool(), output,
-                                            props, parquet::default_arrow_writer_properties()));
+        ARROW_ASSIGN_OR_RAISE(
+            file_writer, 
+            parquet::arrow::FileWriter::Open(*schema,
+                arrow::default_memory_pool(), 
+                output,
+                props, 
+                parquet::default_arrow_writer_properties()
+                )
+        );
 
         return arrow::Status::OK();
     }

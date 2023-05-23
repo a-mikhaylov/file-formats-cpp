@@ -5,8 +5,8 @@
 
 #include "_libs/_ArrowParquet/parquet_test.h"
 #include "_libs/_ArrowParquet/test.h"
-// #include "_libs/_HDF5/hdf5-test.h"  // пока концентрируемся
-// #include "_libs/_DuckDB/duckdb.hpp" // на parquet
+#include "_libs/_DuckDB/duckdb.hpp"
+// #include "_libs/_HDF5/hdf5-test.h"
 
 int main() {
     Log test_Log("../Logs/LogEncode.csv"); //debug_set::LOG_FILE
@@ -37,13 +37,13 @@ int main() {
         test_Log, 
         Quants, 
         Compression
-    );//
+    );
 
-    test_ns::Test2_read(
+    /* test_ns::Test2_read(
         test_Log, 
         {1024*8*4*4}, 
         {arrow::Compression::type::UNCOMPRESSED}
-    );
+    ); */
 
 test_Log.Flush();
 return 0;
