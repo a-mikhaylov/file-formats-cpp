@@ -29,7 +29,7 @@ target_link_libraries(file-formats-cpp Arrow::arrow_shared)
 target_link_libraries(file-formats-cpp Parquet::parquet_shared)
 target_link_libraries(file-formats-cpp ArrowDataset::arrow_dataset_shared)
 
-# target_link_libraries(file-formats-cpp ${CMAKE_SOURCE_DIR}/_libs/_DuckDB/libduckdb.so)
+target_link_libraries(file-formats-cpp ${CMAKE_SOURCE_DIR}/_libs/_DuckDB/libduckdb.so)
 
 # target_link_libraries(file-formats-cpp PRIVATE hdf5::hdf5-static hdf5::hdf5_hl-static)
 # 

@@ -52,19 +52,17 @@ int test_ns::Test4_shuffle(Log& test_Log, std::vector<int> quants,
     std::string file_title;
     std::string tmp_out_fname;
     std::string tmp_in_fname;
-    int which_file = -1; //определять, имя какого файл сейчас писать
     int writeParts = 0;  //количество кусков при записи
     int readParts  = 0;
 //----------------------------------------------------------------------------------
     for (std::string file : files) {
-        ++which_file;
         for (int QUANT : quants) {
             for (arrow::Compression::type compr : compressions) { 
                 for (size_t shuf_part : shuffle_parts) {
                 
-                    if      (which_file == 0)
+                    if      (file == small_fname)
                         file_title = "small";
-                    else if (which_file == 1)
+                    else if (file == big_fname)
                         file_title = "big";
 
                     info.setFileID(GenerateParquetName(file_title, QUANT, compr));

@@ -12,10 +12,10 @@ int main() {
     Log test_Log("../Logs/LogEncode.csv"); //debug_set::LOG_FILE
 
     std::vector<int> Quants = {
-          1024,
-          1024*8, 
-          1024*8*4,
-          1024*8*4*4
+          1024,      //2^10
+          1024*8,    //2^13
+          1024*8*4,  //2^15
+          1024*8*4*4 //2^17
         };
 
     std::vector<arrow::Compression::type> Compression = {
@@ -33,21 +33,8 @@ int main() {
         {1000, 50000}
     };
 
-    test_ns::Test1_write(
-        test_Log, 
-        Quants, 
-        Compression
-    );
 
-    /* test_ns::Test2_read(
-        test_Log, 
-        {1024*8*4*4}, 
-        {arrow::Compression::type::UNCOMPRESSED}
-    ); */
-
-test_Log.Flush();
-return 0;
-
+//---------------------------------------------
     test_ns::Test1_write(
         test_Log, 
         Quants, 

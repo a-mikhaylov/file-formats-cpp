@@ -6,28 +6,34 @@
 namespace test_ns {
      const std::string TEST1_DATA_DIR = "/../$Test1_data";
      const std::string TESTLOG_DATA_DIR = "/../$TestLog_data";
-     const std::string ENCODE_DATA_DIR = "/../$EncodeDELTA_LR_BIN_PACK_data";
+     const std::string ENCODE_DATA_DIR = "/../$EncodeDisableDict";
 
      const std::string RUN_DATA_DIR = ENCODE_DATA_DIR;
-    //тест записи файлов в формат parquet:
-    //проверка различных файлов (std::vector<std::string),
+    //тест файлов в формате parquet:
+    //проверка различных файлов (std::vector<std::string),  //пока нету
     //проверка различных квантов записи (std::vector<int>),
     //проверка различных типов сжатия (std::vector<arrow::Compression::type>),
     //
-    //Сохраняем в лог:
-    //Объём файла + время (только!) записи + кол-во блоков записи
+    
+    //Запись из .bin в .parquet
+    //Засекается: время записи, время записи одного кванта, объём получившихся файлов 
     int Test1_write(
         Log& test_Log, 
         std::vector<int> quants, 
         std::vector<arrow::Compression::type> compressions
         );
     
+    //Чтение из .parquet
+    //Засекается: время чтение всего файла, время чтения одного кванта
     int Test2_read(
         Log& test_Log, 
         std::vector<int> quants, 
         std::vector<arrow::Compression::type> compressions
         );
 
+    //Чтение случайных мест в файле
+    //toRead - вектор пар формата {точка начала, количество точек}
+    //Засекается: время чтения интервала
     int Test3_randread(
         Log& test_Log, 
         std::vector<int> quants, 
@@ -35,6 +41,8 @@ namespace test_ns {
         std::vector<std::pair<int, int>> toRead
         );
 
+    //Чтение всего файла, но в рандомном порядке
+    //shuffle_parts - размер куска, на которые разбиваем файл
     int Test4_shuffle(
         Log& test_Log, 
         std::vector<int> quants, 

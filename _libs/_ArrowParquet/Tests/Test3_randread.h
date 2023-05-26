@@ -49,17 +49,15 @@ int test_ns::Test3_randread(Log& test_Log, std::vector<int> quants,
     std::vector<float> part_time(toRead.size());
 
     std::string file_title;
-    int which_file = -1; //определять, имя какого файл сейчас писать
     int readParts = 0;
 
     for (std::string file : files) {
-        ++which_file;
         for (int QUANT : quants) {
             for (arrow::Compression::type compr : compressions) {
                 
-                if      (which_file == 0)
+                if      (file == small_fname)
                     file_title = "small";
-                else if (which_file == 1)
+                else if (file == big_fname)
                     file_title = "big";
 
                 info.setFileID(GenerateParquetName(file_title, QUANT, compr));

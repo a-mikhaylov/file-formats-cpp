@@ -4,9 +4,6 @@
 #include "careate_write_iterative.h"
 #include <boost/filesystem.hpp>
 
-#define PARQUET_DATA_DIR   std::string("DataWriter_RESULT")
-#define PARQUET_DATA_FNAME std::string("/Written-ZSTD.parquet")//std::string("/ecg.parquet")
-
 using parquet::Encoding;
 
 //пока что работает только с int32_t (несложно шаблонизировать)
@@ -144,6 +141,7 @@ public:
             ->compression(CompressType)
             // ->compression_level(1)
             ->encoding(Encoding::DELTA_BINARY_PACKED)
+            ->disable_dictionary() //для работы кодировки
             ->build();
         
         
@@ -155,7 +153,7 @@ public:
                 output,
                 props, 
                 parquet::default_arrow_writer_properties()
-                )
+            )
         );
 
         return arrow::Status::OK();
