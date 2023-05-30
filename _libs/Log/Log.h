@@ -2,7 +2,7 @@
 
 #include <iostream>
 #include <boost/filesystem.hpp>
-#include "../_ArrowParquet/include_base_exmpl.h"
+#include "../_ArrowParquet/Examples/include_base_exmpl.h"
 
 namespace filesys = boost::filesystem;
 

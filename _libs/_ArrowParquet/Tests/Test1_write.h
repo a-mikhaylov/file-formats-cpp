@@ -3,24 +3,24 @@
 #include "../../_hdr-bin/bin.h"
 #include "../ArrowDataReader.h"
 #include "../ArrowDataWriter.h"
-#include "test_ns.h"
+#include "prqt_test.h"
 #include "../../Log/Log.h"
-#include "../debug_func.h"
+#include "../prqt_settings.h"
 #include <sys/stat.h>
 #include <sys/types.h>
 
-int test_ns::Test1_write(Log& test_Log, std::vector<int> quants, std::vector<arrow::Compression::type> compressions)
+int prqt_test::Test1_write(Log& test_Log, std::vector<int> quants, std::vector<arrow::Compression::type> compressions)
 {
     //для записи логов:
     FileRunInfo info;
 
     std::string cur_path(boost::filesystem::current_path().c_str());
-    std::cerr << "[TEST]: test_ns::Test1_write() - STARTED: "
+    std::cerr << "[TEST]: prqt_test::Test1_write() - STARTED: "
               << cur_path << std::endl << std::endl;
     
-    const std::string data_dir    = cur_path + test_ns::RUN_DATA_DIR; //директория для вывода
-    const std::string big_fname   = cur_path + debug_set::BIG_FILE;   //текущее расположение
-    const std::string small_fname = cur_path + debug_set::SMALL_FILE; //бинарных исходников
+    const std::string data_dir    = cur_path + prqt_test::RUN_DATA_DIR; //директория для вывода
+    const std::string big_fname   = cur_path + prqt_settings::BIG_FILE;   //текущее расположение
+    const std::string small_fname = cur_path + prqt_settings::SMALL_FILE; //бинарных исходников
     
     //в перспективе - будет подаваться на вход
     const std::vector<std::string> files = {/* small_fname,  */big_fname};

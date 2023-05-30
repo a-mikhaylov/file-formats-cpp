@@ -10,7 +10,7 @@ class DuckDBReader {
 
 };
 
-void DebugBuckDB() {
+void DebugDuckDB() {
     duckdb::DuckDB db(nullptr);
     duckdb::Connection con(db);
 
@@ -20,10 +20,15 @@ void DebugBuckDB() {
     // insert three rows into the table
     con.Query("INSERT INTO integers VALUES (3, 4), (5, 6), (7, NULL)");
 
-    duckdb::MaterializedQueryResult result = con.Query("SELECT * FROM integers");
-    if (!result->success) {
-        std::cerr << result->error;
-    }
+    con.Query("INSTALL substrait");
+    con.Query("LOAD substrait");
+
+    std::cerr << con.GetSubstraitJSON("SELECT * FROM integers") << std::endl;
+
+    // std::unique_ptr<duckdb::MaterializedQueryResult> result = con.Query("SELECT * FROM integers");
+    // if (!result->success) {
+        // std::cerr << result->error;
+    // }
 
     // con.
 }

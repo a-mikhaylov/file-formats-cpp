@@ -1,9 +1,9 @@
 #pragma once
 
-#include "../parquet_test.h"
+// #include "../parquet_test.h"
 #include "../../Log/Log.h"
 
-namespace test_ns {
+namespace prqt_test {
      const std::string TEST1_DATA_DIR = "/../$Test1_data";
      const std::string TESTLOG_DATA_DIR = "/../$TestLog_data";
      const std::string ENCODE_DATA_DIR = "/../$EncodeDisableDict";
@@ -49,4 +49,7 @@ namespace test_ns {
         std::vector<arrow::Compression::type> compressions, 
         std::vector<int> shuffle_parts
         );
+
+    //большой тест, включающий прогон каждого из предыдущих
+    void ArrowParquetTest();
 }

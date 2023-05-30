@@ -7,7 +7,7 @@ using CSV
 Big   = "Logs/LogTestBig1-2-3_copy.csv"
 Small = "Logs/LogTest1-2-3_copy2.csv"
 Shuffle  = "Logs/LogShuffle1k.csv"
-file = "Logs/LogEncode.csv"
+file = "Logs/LogEncodeBig.csv"
 df = CSV.File(file) |> DataFrame
 
 # @df df plot(cols(:time_read))
