@@ -11,6 +11,8 @@ class DuckDBWriter {
     std::vector<std::string> col_names;
     int col_count;
 
+    int point_num = 0; //точка, в которую будем писать в следующий раз
+
     //создаёт строку для SQL-запроса с добавлением данной строки
     std::string MakeInsertString(std::vector<int32_t>& row) {
         std::string res = " (";
@@ -26,7 +28,8 @@ public:
         col_names = _col_names;
         col_count = col_names.size();
 
-        std::string init_str = "CREATE TABLE " + table_name + "(";
+        std::string init_str = "CREATE TABLE " + table_name + 
+                               "(NUM INTEGER, ";
         for (int i = 0; i < col_names.size(); ++i)
             init_str = init_str + col_names[i] + " INTEGER, ";
         init_str.erase(init_str.end() - 2); init_str.push_back(')');
@@ -35,7 +38,8 @@ public:
         appender = new duckdb::Appender(*con, table_name);
     }
 
-    DuckDBWriter(std::vector<std::string> _col_names = {}, std::string _table_name = "ecg")
+    DuckDBWriter(std::vector<std::string> _col_names = {}, 
+                 std::string _table_name = "ecg")
     {
         table_name = _table_name;
         db = new duckdb::DuckDB("../$Databases/" + table_name + ".duckdb");
@@ -70,17 +74,19 @@ public:
     //Запись с помощью duckdb::Appender
     //Корректность: не проверена
     //Скорость: не проверена
+    //data = [кол-во строк x кол-во столбцов]
     void Write(std::vector<std::vector<int32_t>>& data) {
         // appender->AppendRow(77 ,77, 77, 77);
         for (int i = 0; i < data.size(); ++i) {
             appender->BeginRow();
+            appender->Append<int32_t>(point_num++);
             for (int j = 0; j < col_count; ++j)
                 appender->Append<int32_t>(data[i][j]);
             appender->EndRow();
         }
         appender->Flush();
 
-        PrintCurrentDB();
+        // PrintCurrentDB();
     }
 
     void PrintCurrentDB() {

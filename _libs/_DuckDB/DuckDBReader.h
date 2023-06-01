@@ -5,37 +5,55 @@
 class DuckDBReader {
     duckdb::DuckDB* db;
     duckdb::Connection* con;
-    duckdb::Appender* appender;
     
     std::string table_name;
     std::vector<std::string> col_names;
     int col_count;
+
+    int point_num = 0;      //точка, с которой начнём читать в следующий раз
+    int read_quant = 0;     //пока читаем по размеру входного вектора
 public:
 
-    void Init(std::vector<std::string> _col_names = {}) {
-        col_names = _col_names;
-        col_count = col_names.size();
-
-        std::string init_str = "CREATE TABLE " + table_name + "(";
-        for (int i = 0; i < col_names.size(); ++i)
-            init_str = init_str + col_names[i] + " INTEGER, ";
-        init_str.erase(init_str.end() - 2); init_str.push_back(')');
-        
-        con->Query(init_str);
-        appender = new duckdb::Appender(*con, table_name);
-    }
-
-    DuckDBReader(std::vector<std::string> _col_names = {}, std::string _table_name = "ecg")
+    DuckDBReader(std::string _table_name) 
     {
         table_name = _table_name;
         db = new duckdb::DuckDB("../$Databases/" + table_name + ".duckdb");
         con = new duckdb::Connection(*db);
-        Init(_col_names);
+
+        PrintCurrentDB();
     }
 
     ~DuckDBReader() {
         delete db;
         delete con;
-        delete appender;
+    }
+
+    //dat = [кол-во строк x кол-во столбцов]
+    bool Read(std::vector<std::vector<int32_t>>& dat) {
+        std::unique_ptr<duckdb::MaterializedQueryResult> result = 
+            con->Query("SELECT * FROM " + table_name +
+                       " WHERE " + std::to_string(point_num) + 
+                       "<=NUM AND NUM<" + std::to_string(dat.size() + point_num));
+        // result->Print();
+
+        for (int i = 0; i < dat.size(); ++i) {
+            if (i >= result->RowCount()) {
+                dat.erase(dat.begin() + i - 1);
+                return false;
+            }
+
+            for (int j = 1; j < result->ColumnCount() && (j - 1) < dat[i].size(); ++j){
+                dat[i][j - 1] = result->GetValue<int32_t>(j, i);
+            }
+            ++point_num;
+        }
+
+        return true;
+    }
+
+    void PrintCurrentDB() {
+        std::unique_ptr<duckdb::MaterializedQueryResult> result = 
+            con->Query("SELECT * FROM " + table_name);
+        result->Print();
     }
 };

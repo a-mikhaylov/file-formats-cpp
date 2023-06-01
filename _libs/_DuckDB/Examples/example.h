@@ -4,9 +4,11 @@
 #include "../duckdb.hpp"
 
 void DebugDuckDB() {
+    std::cerr << "[DEBUG]: Start" << std::endl;
+
     duckdb::DuckDB db("../$Databases/example.duckdb");
     duckdb::Connection con(db);
-    return;
+
     // create a table
     con.Query(
         std::string("CREATE TABLE example_table(LR INTEGER, FR INTEGER, C1R INTEGER, C2L INTEGER,") +
@@ -28,9 +30,21 @@ void DebugDuckDB() {
     /* std::cerr << con.GetSubstraitJSON("SELECT * FROM example_table") << std::endl
               << std::endl << std::endl; */
     
-    std::unique_ptr<duckdb::MaterializedQueryResult> result = con.Query("SELECT * FROM example_table");
+    std::unique_ptr<duckdb::MaterializedQueryResult> result = 
+        con.Query("SELECT * FROM example_table");
     std::cerr << result->ToString() << std::endl
               << std::endl << std::endl;
 
-    // con.Query("EXPORT DATABASE '../$Databases/' (FORMAT PARQUET)");
+    result = con.Query("SHOW TABLES");
+    std::cerr << result->ToString() << std::endl
+              << std::endl << std::endl;
+
+    std::cerr << db.Platform() << std::endl
+              << db.SourceID() << std::endl;
+
+    // std::unordered_set<std::string> names = con.GetTableNames();
+    // for (auto it = names.begin(); it != names.end(); ++it) 
+        // std::cerr << it->c_str() << std::endl;
+
+    std::cerr << "[DEBUG]: End" << std::endl;
 }
