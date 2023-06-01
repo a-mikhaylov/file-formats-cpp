@@ -20,7 +20,7 @@ public:
         db = new duckdb::DuckDB("../$Databases/" + table_name + ".duckdb");
         con = new duckdb::Connection(*db);
 
-        PrintCurrentDB();
+        // PrintCurrentDB();
     }
 
     ~DuckDBReader() {
