@@ -184,6 +184,7 @@ public:
         return arrow::Status::OK();
     }
 
+    //data = [канал][точка]
     arrow::Status Write(std::vector<std::vector<int32_t>>& data, int64_t chunk_size = 67108864L) {
         ARROW_RETURN_NOT_OK(Write(*MakeTable(data).get(), chunk_size));
         POINTS_WRITED += data[0].size();

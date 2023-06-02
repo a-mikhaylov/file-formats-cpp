@@ -28,9 +28,9 @@ int main() {
         };
     std::vector<std::vector<int32_t>> dat_1(QUANT);
     for (int i = 0; i < dat_1.size(); ++i)
-        dat_1[i].resize(dat[0].size());
+        dat_1[i].resize(8);
     
-    {
+    /* {
         BinReader BRead("../_data/small_8x1e6", QUANT);
         DuckDBWriter DBWr({ "LR", "FR", "C1R", "C2L", 
                             "C3F", "C4R", "C5L", "C6F"}, 
@@ -39,15 +39,11 @@ int main() {
         while (BRead.Read(dat_1)) {
             DBWr.Write(dat_1);
         }
-    }
-
-    dat_1.resize(QUANT);
-    for (int i = 0; i < dat_1.size(); ++i)
-        dat_1[i].resize(8);
+    } */
 
     {
         BinWriter BWr("../$Databases/smalltest1.bin");
-        DuckDBReader DBRe("test1");
+        DuckDBReader DBRe("test1", QUANT);
 
         while(DBRe.Read(dat_1))
             BWr.Write(dat_1);

@@ -101,6 +101,7 @@ public:
 
     size_t getPointsCount() { return hdr.start_end[1] - hdr.start_end[0]; }
 
+    //data = [канал][точка]
     bool Read(std::vector<std::vector<int32_t>>& data) {
         if (next_stop) 
             return false;
@@ -217,8 +218,12 @@ class BinWriter {
 
     std::ofstream bin_output;
 
-    void FirstRun(std::vector<std::vector<int32_t>>& dat) {
-        channels_count   = dat.size();
+    void FirstRun(std::vector<std::vector<int32_t>>& dat, bool revers = false) {
+        if (revers) {
+            if (dat.size() != 0)
+                channels_count = dat[0].size();
+        } else 
+            channels_count   = dat.size();
 
         SIZE    = channels_count * sizeof(int32_t);
         buf     = new int32_t[channels_count];
@@ -243,6 +248,7 @@ public:
             delete [] buf;
     }
 
+    // data[канал][точка]
     bool Write(std::vector<std::vector<int32_t>>& dat) {
         //инициализируем оставшиеся значения, считая, что за всё время записи
         //dat не изменит кол-ва столбцов

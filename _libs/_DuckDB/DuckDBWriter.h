@@ -74,19 +74,22 @@ public:
     //Запись с помощью duckdb::Appender
     //Корректность: не проверена
     //Скорость: не проверена
-    //data = [кол-во строк x кол-во столбцов]
-    void Write(std::vector<std::vector<int32_t>>& data) {
-        // appender->AppendRow(77 ,77, 77, 77);
-        for (int i = 0; i < data.size(); ++i) {
+    //data = [канал][точка]
+    bool Write(std::vector<std::vector<int32_t>>& data) {
+        if (data.size() == 0)
+            return false;
+        
+        for (int i = 0; i < data[0].size(); ++i) {
             appender->BeginRow();
             appender->Append<int32_t>(point_num++);
-            for (int j = 0; j < col_count; ++j)
-                appender->Append<int32_t>(data[i][j]);
+            for (int j = 0; j < col_count && j < data.size(); ++j)
+                appender->Append<int32_t>(data[j][i]);
             appender->EndRow();
         }
         appender->Flush();
 
         // PrintCurrentDB();
+        return true;
     }
 
     void PrintCurrentDB() {
