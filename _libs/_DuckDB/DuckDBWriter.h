@@ -1,6 +1,7 @@
 #pragma once
 
 #include "duckdb.hpp"
+#include "duckdb_settings.h"
 
 class DuckDBWriter {
     duckdb::DuckDB* db;
@@ -33,7 +34,6 @@ public:
         for (int i = 0; i < col_names.size(); ++i)
             init_str = init_str + col_names[i] + " INTEGER, ";
         init_str.erase(init_str.end() - 2); init_str.push_back(')');
-        
         con->Query(init_str);
         appender = new duckdb::Appender(*con, table_name);
     }
@@ -42,7 +42,8 @@ public:
                  std::string _table_name = "ecg")
     {
         table_name = _table_name;
-        db = new duckdb::DuckDB("../$Databases/" + table_name + ".duckdb");
+        std::cerr << duckdb_settings::DATA_DIR + table_name + ".duckdb" << std::endl;
+        db = new duckdb::DuckDB(duckdb_settings::DATA_DIR + table_name + ".duckdb");
         con = new duckdb::Connection(*db);
         Init(_col_names);
     }

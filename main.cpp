@@ -27,15 +27,8 @@ int main() {
     int QUANT = 1000;
     std::vector<std::vector<int32_t>> dat_1(QUANT);
 
-    {
-        BinReader BRead("../_data/small_8x1e6", QUANT);
-        DuckDBWriter DBWr({ "LR", "FR", "C1R", "C2L", 
-                            "C3F", "C4R", "C5L", "C6F"}, 
-                            table_name);
-
-        while (BRead.Read(dat_1))
-            DBWr.Write(dat_1);
-    }
+    duckdb_test::Test1_write(test_Log, Quants);
+    return 0;
 
     {
         BinWriter BWr("../$Databases/" + table_name + ".bin");

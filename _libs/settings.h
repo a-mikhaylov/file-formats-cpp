@@ -4,6 +4,9 @@ namespace settings {
     const std::string BIG_FILE   = "/../_data/big_8x60e6";
     const std::string SMALL_FILE = "/../_data/small_8x1e6";
 
+    const std::string BIG_PATH = "../_data/big_8x60e6";
+    const std::string SMALL_PATH = "../_data/small_8x1e6";
+
     void LogWriteResultWrite(std::ofstream& log_out, int step_num, int quant_size, int parquet_size, 
                             float bin_parquet_time, int write_parts, std::string comment = "") 
     {
