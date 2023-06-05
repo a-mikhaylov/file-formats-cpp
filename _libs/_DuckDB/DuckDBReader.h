@@ -42,42 +42,33 @@ public:
 
     //dat = [канал][точка]
     bool Read(std::vector<std::vector<int32_t>>& dat) {
+        bool res = true;
         PrepareData(dat);
         
         std::unique_ptr<duckdb::MaterializedQueryResult> result = 
             con->Query("SELECT * FROM " + table_name +
                        " WHERE " + std::to_string(point_num) + 
                        "<=NUM AND NUM<" + std::to_string(point_num + read_quant));
-        // result->Print();
 
         for (int i = 1; i < result->ColumnCount() && (i - 1) < dat.size(); ++i) {
            for (int j = 0; j < read_quant; ++j) { 
                 //выдало меньше строк, чем read_quant (конец записи) 
                 if (j >= result->RowCount()) {
                     dat[i - 1].erase(dat[i - 1].begin() + j - 1, dat[i - 1].end());
+                    res = false;
                     break;    
                 }
 
                 dat[i - 1][j] = result->GetValue<int32_t>(i, j);
-           }
+                
+                //считаем, что все столбцы одинакого размера =>  
+                //увеличиваются на одинаковое значение
+                if (i == 1) 
+                    ++point_num;
+            }
         }
 
-        if (dat[0].size() < read_quant)
-            return false;
-        /* for (int i = 0; i < read_quant; ++i) {
-            //выдало меньше строк, чем read_quant (конец записи) 
-            if (i >= result->RowCount()) {
-                dat.erase(dat.begin() + i - 1);
-                return false;
-            }
-
-            for (int j = 1; j < result->ColumnCount() && (j - 1) < dat[i].size(); ++j){
-                dat[i][j - 1] = result->GetValue<int32_t>(j, i);
-            }
-            ++point_num;
-        } */
-
-        return true;
+        return res;
     }
 
     void PrintCurrentDB() {
