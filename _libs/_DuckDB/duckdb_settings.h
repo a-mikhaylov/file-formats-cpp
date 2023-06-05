@@ -1,5 +1,5 @@
 #pragma once
-//
+
 namespace duckdb_settings {
     const std::string DATA_DIR  ="../$DuckDBData/";
 
@@ -8,6 +8,6 @@ namespace duckdb_settings {
     }
 
     std::string GenerateBinName(std::string title, int quant) {    
-        return "/FromDB-" + title + "-" + std::to_string(quant) + ".bin";
+        return DATA_DIR + "/FromDB-" + title + "-" + std::to_string(quant) + ".bin";
     }
 }

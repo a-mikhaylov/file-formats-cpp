@@ -23,20 +23,30 @@ int main() {
           1024*8*4*4 //2^17
         };
 
-    std::string table_name = "duckdb_test6";
-    int QUANT = 1000;
+    // std::string table_name = "duckdb_test6";
+    int QUANT = 1024;
     std::vector<std::vector<int32_t>> dat_1(QUANT);
 
     duckdb_test::Test1_write(test_Log, Quants);
-    return 0;
+    /* {
+        BinReader BRead("../_data/small_8x1e6", QUANT);
+        DuckDBWriter DBWr({ "LR", "FR", "C1R", "C2L", 
+                            "C3F", "C4R", "C5L", "C6F"}, 
+                            "Debug4");
 
-    {
-        BinWriter BWr("../$Databases/" + table_name + ".bin");
-        DuckDBReader DBRe(table_name, QUANT);
+        while (BRead.Read(dat_1))
+            DBWr.Write(dat_1);
+    
+    } */
+
+    duckdb_test::Test2_read(test_Log, Quants);//
+    /* {
+        BinWriter BWr("../$Databases/Debug4.bin");
+        DuckDBReader DBRe("Debug4", QUANT);
 
         while(DBRe.Read(dat_1))
             BWr.Write(dat_1);
-    }
+    } */
 
     return 0;
 }

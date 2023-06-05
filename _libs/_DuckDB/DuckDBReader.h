@@ -28,7 +28,7 @@ public:
     {
         read_quant = _read_quant;
         table_name = _table_name;
-        db = new duckdb::DuckDB("../$Databases/" + table_name + ".duckdb");
+        db = new duckdb::DuckDB(duckdb_settings::DATA_DIR + table_name + ".duckdb");
         con = new duckdb::Connection(*db);
         col_count = con->Query("SELECT * FROM " + table_name)->ColumnCount() - 1;
     
@@ -57,7 +57,7 @@ public:
            for (int j = 0; j < read_quant; ++j) { 
                 //выдало меньше строк, чем read_quant (конец записи) 
                 if (j >= result->RowCount()) {
-                    dat[i - 1].erase(dat[i - 1].begin() + j - 1, dat[i - 1].end());
+                    dat[i - 1].erase(dat[i - 1].begin() + j, dat[i - 1].end());
                     break;    
                 }
 
