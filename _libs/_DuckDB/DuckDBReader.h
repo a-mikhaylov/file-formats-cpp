@@ -50,12 +50,14 @@ public:
                        " WHERE " + std::to_string(point_num) + 
                        "<=NUM AND NUM<" + std::to_string(point_num + read_quant));
 
+        if (result->RowCount() == 0)
+            return false;
+
         for (int i = 1; i < result->ColumnCount() && (i - 1) < dat.size(); ++i) {
            for (int j = 0; j < read_quant; ++j) { 
                 //выдало меньше строк, чем read_quant (конец записи) 
                 if (j >= result->RowCount()) {
                     dat[i - 1].erase(dat[i - 1].begin() + j - 1, dat[i - 1].end());
-                    res = false;
                     break;    
                 }
 

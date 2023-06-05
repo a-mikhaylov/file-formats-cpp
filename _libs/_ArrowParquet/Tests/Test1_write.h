@@ -6,6 +6,7 @@
 #include "prqt_test.h"
 #include "../../Log/Log.h"
 #include "../prqt_settings.h"
+#include "../../settings.h"
 #include <sys/stat.h>
 #include <sys/types.h>
 
@@ -19,8 +20,8 @@ int prqt_test::Test1_write(Log& test_Log, std::vector<int> quants, std::vector<a
               << cur_path << std::endl << std::endl;
     
     const std::string data_dir    = cur_path + prqt_test::RUN_DATA_DIR; //директория для вывода
-    const std::string big_fname   = cur_path + prqt_settings::BIG_FILE;   //текущее расположение
-    const std::string small_fname = cur_path + prqt_settings::SMALL_FILE; //бинарных исходников
+    const std::string big_fname   = cur_path + settings::BIG_FILE;   //текущее расположение
+    const std::string small_fname = cur_path + settings::SMALL_FILE; //бинарных исходников
     
     //в перспективе - будет подаваться на вход
     const std::vector<std::string> files = {/* small_fname,  */big_fname};
@@ -63,16 +64,17 @@ int prqt_test::Test1_write(Log& test_Log, std::vector<int> quants, std::vector<a
                 else if (file == big_fname)
                     file_title = "big";
 
-                info.setFileID(GenerateParquetName(file_title, QUANT, compr));
+                info.setFileID(prqt_settings::GenerateParquetName(file_title, QUANT, compr));
                 info.setRunSetting(compr, QUANT);
 
-                std::cerr << GenerateParquetName(file, QUANT, compr) << std::endl;
+                std::cerr << prqt_settings::GenerateParquetName(file, QUANT, compr) << std::endl;
 
                 //Запись из *.bin в *.parquet
                 { 
                     BinReader BReader{file, QUANT};
-                    ArrowDataWriter ADWriter{"", data_dir, GenerateParquetName(file_title, QUANT, compr),
-                                            schema, compr};
+                    ArrowDataWriter ADWriter{
+                        "", data_dir, prqt_settings::GenerateParquetName(file_title, QUANT, compr),
+                        schema, compr};
                     
                     info.setInfo(BReader.getChannelsCount(), BReader.getPointsCount());
                     while(BReader.Read(dat)) {
@@ -80,7 +82,7 @@ int prqt_test::Test1_write(Log& test_Log, std::vector<int> quants, std::vector<a
                             ADWriter.Write(dat);
                         tmp_stop = high_resolution_clock::now();
                         ++writeParts;
-                        UpdateTime(bin_par_time, tmp_start, tmp_stop);
+                        settings::UpdateTime(bin_par_time, tmp_start, tmp_stop);
                     }
                     tmp_in_fname  = BReader.getFileName(); 
                     tmp_out_fname = ADWriter.getFileName();
@@ -90,7 +92,7 @@ int prqt_test::Test1_write(Log& test_Log, std::vector<int> quants, std::vector<a
                 info.setFilesSizes(tmp_in_fname, tmp_out_fname);
                 info.setWriteTime(bin_par_time, bin_par_time / (float)QUANT);
 
-                ResetTime(bin_par_time, par_bin_time); 
+                settings::ResetTime(bin_par_time, par_bin_time); 
                 writeParts = 0;     
 
                 test_Log.addInfo(info);

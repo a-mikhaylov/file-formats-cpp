@@ -1,0 +1,80 @@
+#pragma once
+
+namespace settings {
+    const std::string BIG_FILE   = "/../_data/big_8x60e6";
+    const std::string SMALL_FILE = "/../_data/small_8x1e6";
+
+    void LogWriteResultWrite(std::ofstream& log_out, int step_num, int quant_size, int parquet_size, 
+                            float bin_parquet_time, int write_parts, std::string comment = "") 
+    {
+        log_out << "NODE #" << step_num << ":" << std::endl
+                << "Comment: " << comment << std::endl << std::endl
+                << "\tQuant     = " << quant_size << std::endl
+                << "\tFile size = " << parquet_size << std::endl
+                << std::endl
+                << "\tWRITE     time = " << bin_parquet_time << "c" << std::endl
+                << "\tAvg_quant time =  " << bin_parquet_time / (float)write_parts << "c" << std::endl
+                << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
+    }
+
+    void LogWriteResultRead(std::ofstream& log_out, int step_num, int quant_size, int parquet_size, 
+                            float parquet_bin_time, int read_parts, std::string comment = "") 
+    {
+        log_out << "NODE #" << step_num << ":" << std::endl
+                << "Comment: " << comment << std::endl << std::endl
+                << "\tQuant     = " << quant_size << std::endl
+                << "\tFile size = " << parquet_size << std::endl
+                << std::endl
+                << "\tREAD      time = " << parquet_bin_time << "c" << std::endl
+                << "\tAvg_quant time =  " << parquet_bin_time / (float)read_parts << "c" << std::endl
+                << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
+    }
+
+    void LogWriteResultRandRead(std::ofstream& log_out, int quant_size, int parquet_size, 
+                                std::vector<float> part_time, std::vector<std::pair<int, int>> parts,
+                                std::string comment = "") 
+    {
+        log_out << "Comment: " << comment << std::endl << std::endl
+                << "\tQuant = " << quant_size << std::endl 
+                << std::endl;
+                
+        for (int i = 0; i < part_time.size(); ++i) {
+            log_out << "\t" << std::to_string(parts[i].first) << " - " <<  std::to_string(parts[i].first + parts[i].second)
+                      << ": " << part_time[i] << "c" << std::endl;
+        }
+
+        log_out << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
+    }
+
+    void PrintVector(std::string label, std::vector<int> x) {
+        std::cerr << label << std::endl << "\t{ ";
+        for (int i = 0; i < x.size(); ++i) std::cerr << x[i] << ",\t";
+        std::cerr << "\b\b }" << std::endl;
+    }
+
+    void PrintVector(std::string label, std::vector<std::vector<int>> x) {
+        std::cerr << label << std::endl;
+        for (int i = 0; i < x.size(); ++i) {
+            std::cerr << "\t{  ";
+            for (int j = 0; j < x[i].size(); ++j)
+                std::cerr << x[i][j] << ",\t";
+            std::cerr << "\b\b }" << std::endl;
+        }
+    }
+
+
+    void UpdateTime(float& var, high_resolution_clock::time_point& start, high_resolution_clock::time_point& stop) {
+        var = var + ((float)duration_cast<microseconds>(stop - start).count() / 1000000.0f);
+    }
+
+    void ResetTime(float& var1, float& var2) {
+        var1 = 0.0f;
+        var2 = 0.0f;
+    }
+
+    void ResetTime(std::vector<float>& part_time) {
+        for (int i = 0; i < part_time.size(); ++i )
+            part_time[i] = 0;
+    }
+
+}

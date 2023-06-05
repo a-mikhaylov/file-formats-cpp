@@ -5,6 +5,7 @@
 #include "../ArrowDataWriter.h"
 #include "prqt_test.h"
 #include "../prqt_settings.h"
+#include "../../settings.h"
 #include <sys/stat.h>
 #include <sys/types.h>
 
@@ -17,8 +18,8 @@ int prqt_test::Test2_read(Log& test_Log, std::vector<int> quants, std::vector<ar
               << cur_path << std::endl << std::endl;
     
     const std::string data_dir    = cur_path + prqt_test::RUN_DATA_DIR; //директория для вывода
-    const std::string big_fname   = cur_path + prqt_settings::BIG_FILE;   //текущее расположение
-    const std::string small_fname = cur_path + prqt_settings::SMALL_FILE; //бинарных исходников
+    const std::string big_fname   = cur_path + settings::BIG_FILE;   //текущее расположение
+    const std::string small_fname = cur_path + settings::SMALL_FILE; //бинарных исходников
     
     //в перспективе - будет подаваться на вход
     const std::vector<std::string> files = {/* small_fname,  */big_fname};
@@ -57,20 +58,24 @@ int prqt_test::Test2_read(Log& test_Log, std::vector<int> quants, std::vector<ar
                 else if (file == big_fname)
                     file_title = "big";
 
-                info.setFileID(GenerateParquetName(file_title, QUANT, compr));
+                info.setFileID(prqt_settings::GenerateParquetName(file_title, QUANT, compr));
                 info.setRunSetting(compr, QUANT);
 
-                std::cerr << GenerateParquetName(file, QUANT, compr) << std::endl;
+                std::cerr << prqt_settings::GenerateParquetName(file, QUANT, compr) << std::endl;
 
                 {
-                    ArrowDataReader ADReader{data_dir + GenerateParquetName(file_title, QUANT, compr)};
-                    BinWriter BWriter{data_dir + GenerateBinName(file_title, QUANT, compr)};
+                    ArrowDataReader ADReader{
+                        data_dir + prqt_settings::GenerateParquetName(file_title, QUANT, compr)
+                        };
+                    BinWriter BWriter{
+                        data_dir + prqt_settings::GenerateBinName(file_title, QUANT, compr)
+                        };
                     bool need_go = true;
                     while(true) {
                         tmp_start = high_resolution_clock::now();
                             need_go = ADReader.Read(dat);
                         tmp_stop = high_resolution_clock::now();
-                        UpdateTime(par_bin_time, tmp_start, tmp_stop);
+                        settings::UpdateTime(par_bin_time, tmp_start, tmp_stop);
                         
                         if (!need_go)
                             break;
@@ -82,7 +87,7 @@ int prqt_test::Test2_read(Log& test_Log, std::vector<int> quants, std::vector<ar
  
                 info.setReadTime(par_bin_time, par_bin_time / (float)readParts); //!!!
 
-                ResetTime(bin_par_time, par_bin_time);
+                settings::ResetTime(bin_par_time, par_bin_time);
                 readParts = 0;
 
                 test_Log.addInfo(info);
