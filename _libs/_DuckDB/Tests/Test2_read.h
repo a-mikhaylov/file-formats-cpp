@@ -6,10 +6,13 @@
 #include "../../Log/Log.h"
 #include "../duckdb_settings.h"
 
-int duckdb_test::Test2_read(Log& test_Log, std::vector<int> quants) {
+int duckdb_test::Test2_read(
+    Log& test_Log, 
+    std::vector<int> quants, 
+    std::vector<std::string> files
+    ) 
+{
     FileRunInfo info;
-
-    std::vector<std::string> files = {settings::SMALL_PATH/* , settings::BIG_PATH */};
 
     std::string title;
     std::vector<std::vector<int32_t>> dat;

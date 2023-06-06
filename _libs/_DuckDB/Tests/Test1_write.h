@@ -7,11 +7,14 @@
 #include "../../settings.h"
 #include "../duckdb_settings.h"
 
-int duckdb_test::Test1_write(Log& test_Log, std::vector<int> quants) {
+int duckdb_test::Test1_write(
+    Log& test_Log, 
+    std::vector<int> quants, 
+    std::vector<std::string> files
+    ) 
+{
     //для записи логов:
     FileRunInfo info;
-
-    std::vector<std::string> files = {settings::SMALL_PATH/* , settings::BIG_PATH */};
 
     std::vector<std::vector<int32_t>> dat;
     std::string title;

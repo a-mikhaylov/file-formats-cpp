@@ -21,7 +21,8 @@ namespace prqt_test {
     int Test1_write(
         Log& test_Log, 
         std::vector<int> quants, 
-        std::vector<arrow::Compression::type> compressions
+        std::vector<arrow::Compression::type> compressions,
+        std::vector<std::string> files
         );
     
     //Чтение из .parquet
@@ -29,7 +30,8 @@ namespace prqt_test {
     int Test2_read(
         Log& test_Log, 
         std::vector<int> quants, 
-        std::vector<arrow::Compression::type> compressions
+        std::vector<arrow::Compression::type> compressions,
+        std::vector<std::string> files
         );
 
     //Чтение случайных мест в файле
@@ -39,7 +41,8 @@ namespace prqt_test {
         Log& test_Log, 
         std::vector<int> quants, 
         std::vector<arrow::Compression::type> compressions, 
-        std::vector<std::pair<int, int>> toRead
+        std::vector<std::pair<int, int>> toRead,
+        std::vector<std::string> files
         );
 
     //Чтение всего файла, но в рандомном порядке
@@ -48,7 +51,8 @@ namespace prqt_test {
         Log& test_Log, 
         std::vector<int> quants, 
         std::vector<arrow::Compression::type> compressions, 
-        std::vector<int> shuffle_parts
+        std::vector<int> shuffle_parts,
+        std::vector<std::string> files
         );
 
     //большой тест, включающий прогон каждого из предыдущих

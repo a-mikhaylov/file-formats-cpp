@@ -9,6 +9,11 @@
 void prqt_test::ArrowParquetTest() {
     Log test_Log("../Logs/LogEncode.csv"); //debug_set::LOG_FILE
 
+    std::vector<std::string> files = {
+        /* small_fname,  */
+        settings::SMALL_PATH
+        };
+
     std::vector<int> Quants = {
           1024,      //2^10
           1024*8,    //2^13
@@ -36,20 +41,23 @@ void prqt_test::ArrowParquetTest() {
     prqt_test::Test1_write(
         test_Log, 
         Quants, 
-        Compression
+        Compression,
+        files
     );
 
     prqt_test::Test2_read(
         test_Log, 
         Quants, 
-        Compression
+        Compression,
+        files
     );
 
     prqt_test::Test3_randread(
         test_Log, 
         Quants, 
         Compression,
-        Points
+        Points,
+        files
     );
 
     /* prqt_test::Test4_shuffle(
@@ -60,7 +68,8 @@ void prqt_test::ArrowParquetTest() {
             // 1000,
             1000
             // 10000
-        }
+        },
+        files
     ); */
 
     test_Log.Flush();

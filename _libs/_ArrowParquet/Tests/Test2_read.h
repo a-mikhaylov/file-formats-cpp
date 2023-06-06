@@ -9,7 +9,12 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-int prqt_test::Test2_read(Log& test_Log, std::vector<int> quants, std::vector<arrow::Compression::type> compressions)
+int prqt_test::Test2_read(
+    Log& test_Log, 
+    std::vector<int> quants, 
+    std::vector<arrow::Compression::type> compressions,
+    std::vector<std::string> files
+    )
 {
     FileRunInfo info;
 
@@ -20,9 +25,6 @@ int prqt_test::Test2_read(Log& test_Log, std::vector<int> quants, std::vector<ar
     const std::string data_dir    = cur_path + prqt_test::RUN_DATA_DIR; //директория для вывода
     const std::string big_fname   = cur_path + settings::BIG_FILE;   //текущее расположение
     const std::string small_fname = cur_path + settings::SMALL_FILE; //бинарных исходников
-    
-    //в перспективе - будет подаваться на вход
-    const std::vector<std::string> files = {/* small_fname,  */big_fname};
     
     //если это первый запуск - создаем нужную директорию
     mkdir((data_dir).c_str(), 0700);
