@@ -142,12 +142,6 @@ public:
             if (group == RGk) {
                 for (int i = 0;  i < tmp.size(); ++i) {
                     if (rowk + 1 > tmp[i].size()) {
-                        /* std::cerr << "\t Points: " << x0 << " - " << xk << std::endl
-                                  << "\t rowk > tmp[" << i << "].size() = " << tmp[i].size() << std::endl
-                                  << "\t Rows_count: " << Rows_count << std::endl
-                                  << "\t RG0, row0: " << RG0 << ", " << row0 << std::endl
-                                  << "\t RGk, rowk: " << RGk << ", " << rowk << std::endl; */
-
                         return false;
                     }
                     
@@ -158,11 +152,6 @@ public:
             if (group == RG0) {
                 for (int i = 0;  i < tmp.size(); ++i) {
                     if (row0 > tmp[i].size()) {
-                        /* std::cerr << "\t Points: " << x0 << " - " << xk << std::endl
-                                  << "\t row0 > tmp[" << i << "].size()" << std::endl
-                                  << "\t RG_count: " << Rows_count << std::endl
-                                  << "\t RG0, row0: " << RG0 << ", " << row0 << std::endl
-                                  << "\t RGk, rowk: " << RGk << ", " << rowk << std::endl; */
                         return false;
                     }
                     

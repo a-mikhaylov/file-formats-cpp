@@ -13,13 +13,18 @@ class DuckDBReader {
     int point_num = 0;      //точка, с которой начнём читать в следующий раз
     int read_quant = 0;     //количество точек чтения
 
-    void PrepareData(std::vector<std::vector<int32_t>>& dat) {
-        if (dat.size() == col_count && dat[0].size() == read_quant)
+    std::unique_ptr<duckdb::MaterializedQueryResult> result;
+
+    void PrepareData(std::vector<std::vector<int32_t>>& dat, int rows = 0) {
+        if (rows == 0)
+            rows = read_quant;
+        
+        if (dat.size() == col_count && dat[0].size() == rows)
             return;
         
         dat.resize(col_count);
         for (int i = 0; i < col_count; ++i)
-            dat[i].resize(read_quant);
+            dat[i].resize(rows);
     }
 
 public:
@@ -46,8 +51,8 @@ public:
         bool res = true;
         PrepareData(dat);
         
-        std::unique_ptr<duckdb::MaterializedQueryResult> result = 
-            con->Query("SELECT * FROM " + table_name +
+        result = con->Query(
+                       "SELECT * FROM " + table_name +
                        " WHERE " + std::to_string(point_num) + 
                        "<=NUM AND NUM<" + std::to_string(point_num + read_quant));
 
@@ -74,9 +79,32 @@ public:
         return res;
     }
 
+    bool Read(std::vector<std::vector<int32_t>>& dat, std::pair<int, int> toRead) {
+        bool res = true;
+        
+        result = con->Query(
+                "SELECT * FROM " + table_name +
+                " WHERE " + std::to_string(toRead.first) + 
+                "<=NUM AND NUM<" + 
+                std::to_string(toRead.first + toRead.second)
+                );
+
+        if (result->RowCount() == 0)
+            return false;
+
+        PrepareData(dat, result->RowCount());
+
+        for (int i = 1; i < result->ColumnCount() && (i - 1) < dat.size(); ++i) {
+           for (int j = 0; j < result->RowCount(); ++j) { 
+                dat[i - 1][j] = result->GetValue<int32_t>(i, j);
+            }
+        }
+
+        return res;
+    }
+
     void PrintCurrentDB() {
-        std::unique_ptr<duckdb::MaterializedQueryResult> result = 
-            con->Query("SELECT * FROM " + table_name);
+        result = con->Query("SELECT * FROM " + table_name);
         result->Print();
     }
 };

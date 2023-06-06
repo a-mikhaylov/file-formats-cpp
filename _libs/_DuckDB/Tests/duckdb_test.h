@@ -4,11 +4,8 @@
 #include "../../Log/Log.h"
 
 namespace duckdb_test {
-     const std::string TEST1_DATA_DIR = "/../$Test1_data";
-     const std::string TESTLOG_DATA_DIR = "/../$TestLog_data";
-     const std::string ENCODE_DATA_DIR = "/../$EncodeDisableDict";
+    // const std::string RUN_DATA_DIR = "../";
 
-     const std::string RUN_DATA_DIR = ENCODE_DATA_DIR;
     //тест файлов в формате базы данных через duckdb:
     //проверка различных файлов (std::vector<std::string),
     //проверка различных квантов записи (std::vector<int>),
@@ -31,6 +28,16 @@ namespace duckdb_test {
     int Test2_read(
         Log& test_Log, 
         std::vector<int> quants,
+        std::vector<std::string> files
+        );
+
+    //Чтение случайных мест в файле
+    //toRead - вектор пар формата {точка начала, количество точек}
+    //Засекается: время чтения интервала
+    int Test3_randread(
+        Log& test_Log, 
+        std::vector<int> quants,
+        std::vector<std::pair<int, int>> toRead,
         std::vector<std::string> files
         );
 }
