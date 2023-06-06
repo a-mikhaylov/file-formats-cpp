@@ -12,7 +12,7 @@
 // #include "_libs/_HDF5/hdf5-test.h"   //в последнюю очередь
 
 int main() {
-    Log test_Log("../Logs/LogDuckDB3.csv"); //debug_set::LOG_FILE
+    Log test_Log("../Logs/LogDuckDB5-r.csv"); //debug_set::LOG_FILE
 
     std::vector<int> Quants = {
           1024,       //2^10
@@ -27,10 +27,9 @@ int main() {
     int QUANT = 1024;
     std::vector<std::vector<int32_t>> dat_1(QUANT);
 
-    duckdb_test::Test1_write(test_Log, Quants);
+    // duckdb_test::Test1_write(test_Log, Quants);
     
-
-    // duckdb_test::Test2_read(test_Log, Quants);//
+    duckdb_test::Test2_read(test_Log, Quants);
     
     test_Log.Flush();
 
