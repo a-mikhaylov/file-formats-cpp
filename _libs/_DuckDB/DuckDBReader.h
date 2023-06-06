@@ -7,7 +7,7 @@ class DuckDBReader {
     duckdb::Connection* con;
     
     std::string table_name;
-    // std::vector<std::string> col_names;
+    std::string file_name;
     int col_count;
 
     int point_num = 0;      //точка, с которой начнём читать в следующий раз
@@ -28,7 +28,8 @@ public:
     {
         read_quant = _read_quant;
         table_name = _table_name;
-        db = new duckdb::DuckDB(duckdb_settings::DATA_DIR + table_name + ".duckdb");
+        file_name = duckdb_settings::DATA_DIR + table_name + ".duckdb";
+        db = new duckdb::DuckDB(file_name);
         con = new duckdb::Connection(*db);
         col_count = con->Query("SELECT * FROM " + table_name)->ColumnCount() - 1;
     

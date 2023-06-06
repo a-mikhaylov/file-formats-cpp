@@ -98,6 +98,8 @@ public:
     //параметры записи
     void setInfo(int _ch_num, int _all_point) { ch_num = _ch_num; all_point = _all_point; }
 
+    void setQuant(int _quant) { quant_points = _quant; }
+
     void setRunSetting(arrow::Compression::type compr_type, int _quant_points) {
         
         switch(compr_type) {

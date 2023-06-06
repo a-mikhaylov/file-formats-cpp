@@ -9,6 +9,7 @@ class DuckDBWriter {
     duckdb::Appender* appender;
     
     std::string table_name;
+    std::string file_name;
     std::vector<std::string> col_names;
     int col_count;
 
@@ -42,8 +43,9 @@ public:
                  std::string _table_name = "ecg")
     {
         table_name = _table_name;
+        file_name = duckdb_settings::DATA_DIR + table_name + ".duckdb";
         std::cerr << duckdb_settings::DATA_DIR + table_name + ".duckdb" << std::endl;
-        db = new duckdb::DuckDB(duckdb_settings::DATA_DIR + table_name + ".duckdb");
+        db = new duckdb::DuckDB(file_name);
         con = new duckdb::Connection(*db);
         Init(_col_names);
     }
@@ -53,6 +55,8 @@ public:
         delete con;
         delete appender;
     }
+
+    std::string getFileName() { return file_name; }
 
     //Запись с помощью встроенной команды Insert
     //Корректность: не проверена

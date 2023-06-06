@@ -70,7 +70,7 @@ int prqt_test::Test1_write(Log& test_Log, std::vector<int> quants, std::vector<a
                 std::cerr << prqt_settings::GenerateParquetName(file, QUANT, compr) << std::endl;
 
                 //Запись из *.bin в *.parquet
-                { 
+                
                     BinReader BReader{file, QUANT};
                     ArrowDataWriter ADWriter{
                         "", data_dir, prqt_settings::GenerateParquetName(file_title, QUANT, compr),
@@ -86,11 +86,14 @@ int prqt_test::Test1_write(Log& test_Log, std::vector<int> quants, std::vector<a
                     }
                     tmp_in_fname  = BReader.getFileName(); 
                     tmp_out_fname = ADWriter.getFileName();
-                }
+                
                 std::cerr << "[INFO]: *.bin --> *.parquet - Complited!" << std::endl;
                 
                 info.setFilesSizes(tmp_in_fname, tmp_out_fname);
-                info.setWriteTime(bin_par_time, bin_par_time / (float)QUANT);
+                info.setWriteTime(
+                    bin_par_time, 
+                    bin_par_time / (BReader.getPointsCount() / (float)QUANT)
+                    );
 
                 settings::ResetTime(bin_par_time, par_bin_time); 
                 writeParts = 0;     

@@ -1,0 +1,3 @@
+run_nr; file_id; ch_num; all_points; compresion_type; quant_points; time_write; time_write_quant; time_read; time_read_quant; file_size_mb; compressed_file_size_mb; compression_coef; read_interval_points; read_interval_time
+0; small524288; 8; 1000000; NONE; 524288; 1.431808; 0.000003; 0.000000; 0.000000; 30.517578; 11.511719; 0.377216; 0; 0.000000
+1; small1000000; 8; 1000000; NONE; 1000000; 1.156321; 0.000001; 0.000000; 0.000000; 30.517578; 10.761719; 0.352640; 0; 0.000000
