@@ -1,4 +1,6 @@
 #pragma once
+#include <fstream>
+#include <iostream>
 
 namespace settings {
     const std::string BIG_FILE   = "/../_data/big_8x60e6";
@@ -6,6 +8,12 @@ namespace settings {
 
     const std::string BIG_PATH = "../_data/big_8x60e6";
     const std::string SMALL_PATH = "../_data/small_8x1e6";
+
+    const std::string MARKUP_DIR = "../_data/_markup/";
+    const std::string MARKUP_DB_DIR = "../$MarkupDB/";
+    // const std::string MARKUP_CSV_PATH = "../_data/_markup/qrs.csv";
+    // const std::string MARKUP_BIN_PATH = "../_data/_markup/qrs.bin";
+    // const std::string MARKUP_TOML_PATH = "../_data/_markup/qrs.toml";
 
     void LogWriteResultWrite(std::ofstream& log_out, int step_num, int quant_size, int parquet_size, 
                             float bin_parquet_time, int write_parts, std::string comment = "") 
@@ -80,4 +88,11 @@ namespace settings {
             part_time[i] = 0;
     }
 
+    void CutSpaces(std::string& str) {
+        str.erase(remove_if(str.begin(), str.end(), isspace), str.end());
+    }
+
+    bool to_bool(std::string s) {
+        return (s == "1" || s == "true");
+    }
 }

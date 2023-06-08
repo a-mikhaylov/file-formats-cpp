@@ -40,4 +40,6 @@ namespace duckdb_test {
         std::vector<std::pair<int, int>> toRead,
         std::vector<std::string> files
         );
+
+    void DuckDBTest();
 }
