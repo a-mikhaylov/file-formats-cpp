@@ -2,13 +2,15 @@
 
 #include "../_DuckDB/duckdb.hpp"
 #include "../settings.h"
+#include <nlohmann/json.hpp>
 #include <iostream>
 #include <fstream>
 
+#define DEFAULT_VALUE "__DEFAULT__"
 #define DEFAULT_INT -1
 #define DEFAULT_CHAR "undef"
 #define DEFAULT_BOOL false
-#define DEFAULT_REAL -1.0f
+#define DEFAULT_FLOAT -1.0f
 
 
 class Markup {
@@ -83,6 +85,38 @@ class Markup {
         }
         res.push_back(s);
         return res;
+    }
+
+    void AppendSwitch(Type type, std::string value) {
+        switch (type)
+        {
+        case Type::INTEGER:
+            if (value != DEFAULT_VALUE)
+                appender->Append<int32_t>(atoi(value.c_str()));
+            else 
+                appender->Append<int32_t>(DEFAULT_INT);
+            break;
+        case Type::FLOAT:
+            if (value != DEFAULT_VALUE)
+                appender->Append<float>(atof(value.c_str()));
+            else 
+                appender->Append<float>(DEFAULT_FLOAT);
+            break;
+        case Type::BOOLEAN:
+            if (value != DEFAULT_VALUE)
+                appender->Append<bool>(settings::to_bool(value));
+            else 
+                appender->Append<bool>(DEFAULT_BOOL);
+            break;
+        case Type::VARCHAR:
+            if (value != DEFAULT_VALUE)
+                appender->Append<duckdb::string_t>(value);
+            else 
+                appender->Append<duckdb::string_t>(DEFAULT_CHAR);
+            break;
+        default:
+            break;
+        }
     }
 
     void Init() {
@@ -169,10 +203,9 @@ public:
             return;
         }
 
-        /* for (int i = 0; i < col_names.size(); ++i) {
-            std::cerr << "{" <<col_names[i] << "}\t-\t{" 
-                        << col_types_str[i] << "}" << std::endl;
-        } */
+        std::unique_ptr<duckdb::MaterializedQueryResult> result = 
+            con->Query("SELECT * FROM " + table_name);
+        num = result->RowCount();
 
         Init();
     }
@@ -216,31 +249,17 @@ public:
 
             appender->BeginRow();
             appender->Append<int32_t>(num++);
+
             for (int i = 0; i < col_count; ++i) {
-                switch (col_types[i])
-                {
-                case Type::INTEGER:
-                    appender->Append<int32_t>(atoi(splited[i].c_str()));
-                    break;
-                case Type::VARCHAR:
-                    appender->Append<duckdb::string_t>(splited[i]);
-                    break;
-                case Type::BOOLEAN:
-                    appender->Append<bool>(settings::to_bool(splited[i]));
-                    break;
-                case Type::FLOAT:
-                    appender->Append<float>(atof(splited[i].c_str()));
-                    break;
-                default:
-                    break;
-                }
+                AppendSwitch(col_types[i], splited[i]);
             }
+
             appender->EndRow();
         }
         appender->Flush();
     } //ParseCSV
 
-    //пока строковые значения не рассматриваем
+    //пока без строковых значений
     template<typename T> 
     void EditCell(int num, std::string column, T new_value) {
         con->Query(
@@ -250,7 +269,18 @@ public:
             );
     }
 
-    
+    void AddRow(nlohmann::json j) {
+        appender->BeginRow();
+        appender->Append(num++);
+        for (int i = 0; i < col_names.size(); ++i) {
+            if (j.contains(col_names[i])) 
+                AppendSwitch(col_types[i], j[col_names[i]].dump());
+            else 
+                AppendSwitch(col_types[i], DEFAULT_VALUE);
+        }
+        appender->EndRow();
+        appender->Flush();
+    }
 
     void PrintCurrentDB() {
         std::unique_ptr<duckdb::MaterializedQueryResult> result = 

@@ -2,6 +2,7 @@
 	"name": "file-formats-cpp",
 	"version": "1.0",
 	"dependencies": [
-		"hdf5"
+		"hdf5",
+		"nlohmann-json"
 	]
 }

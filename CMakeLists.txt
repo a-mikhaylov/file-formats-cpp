@@ -17,6 +17,8 @@ find_package(hdf5 CONFIG 1.10.4)
 find_package(Arrow REQUIRED)
 find_package(Parquet REQUIRED)
 find_package(ArrowDataset REQUIRED)
+# json для разметки
+find_package(nlohmann_json CONFIG REQUIRED)
 
 add_executable(file-formats-cpp main.cpp)
 
@@ -28,8 +30,10 @@ target_link_libraries(file-formats-cpp h5cpp hdf5::hdf5)
 target_link_libraries(file-formats-cpp Arrow::arrow_shared)
 target_link_libraries(file-formats-cpp Parquet::parquet_shared)
 target_link_libraries(file-formats-cpp ArrowDataset::arrow_dataset_shared)
-
+# DuckDB
 target_link_libraries(file-formats-cpp ${CMAKE_SOURCE_DIR}/_libs/_DuckDB/libduckdb.so)
+
+target_link_libraries(file-formats-cpp nlohmann_json::nlohmann_json)
 
 # target_link_libraries(file-formats-cpp PRIVATE hdf5::hdf5-static hdf5::hdf5_hl-static)
 # 
