@@ -269,6 +269,7 @@ public:
             );
     }
 
+    //добавляет одну строчку, используя объект json 
     void AddRow(nlohmann::json j) {
         appender->BeginRow();
         appender->Append(num++);
@@ -280,6 +281,15 @@ public:
         }
         appender->EndRow();
         appender->Flush();
+    }
+
+    void AddJson(std::string fname) {
+        nlohmann::json j;
+        std::ifstream inp(fname);
+        inp >> j;
+
+        for (int i = 0; i < j.size(); ++i)
+            AddRow(j[i]);
     }
 
     void PrintCurrentDB() {

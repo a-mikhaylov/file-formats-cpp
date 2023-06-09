@@ -22,6 +22,9 @@ void MarkupExample() {
     // добавляем в конец строку с данными из json-а (одиночная) 
     mrk.AddRow(j[0]);
 
+    // добавляет сразу любое количество строк, используя json-файл
+    mrk.AddJson("../_data/_markup/example.json");
+
     // вывод на экран текущей таблички    
     mrk.PrintCurrentDB();
 }
