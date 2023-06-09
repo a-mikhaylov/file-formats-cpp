@@ -240,6 +240,18 @@ public:
         appender->Flush();
     } //ParseCSV
 
+    //пока строковые значения не рассматриваем
+    template<typename T> 
+    void EditCell(int num, std::string column, T new_value) {
+        con->Query(
+            "UPDATE " + table_name + " SET " +
+            column + "=" + std::to_string(new_value) + 
+            " WHERE NUM=" + std::to_string(num)
+            );
+    }
+
+    
+
     void PrintCurrentDB() {
         std::unique_ptr<duckdb::MaterializedQueryResult> result = 
             con->Query("SELECT * FROM " + table_name);
