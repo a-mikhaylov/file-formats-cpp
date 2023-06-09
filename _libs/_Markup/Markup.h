@@ -282,7 +282,7 @@ public:
         appender->EndRow();
         appender->Flush();
     }
-
+    //добавление всех строк из json-файла
     void AddJson(std::string fname) {
         nlohmann::json j;
         std::ifstream inp(fname);
@@ -290,6 +290,39 @@ public:
 
         for (int i = 0; i < j.size(); ++i)
             AddRow(j[i]);
+    }
+
+    void DeleteRow(int delete_num) {
+        if (delete_num < 0 || delete_num > num - 1)
+            return;
+
+        con->Query("DELETE FROM " + table_name 
+                  + " WHERE NUM=" + std::to_string(delete_num));
+        
+        for (int i = delete_num + 1; i < num; ++i) {
+            EditCell(i, "NUM", i - 1);
+        }
+        --num;
+    }
+
+    void DeleteRow(int delete_start, int delete_end) {
+        if (delete_end < delete_start)
+            return;
+
+        for (int i = delete_start; i < delete_end; ++i) 
+            DeleteRow(i);
+    }
+    //вставка строки на нужную позицию
+    void InsertRow(int pos, nlohmann::json j) {
+        if (pos < 0)
+            pos = 0;
+
+        if (pos > num) {
+            AddRow(j);
+            return;
+        }
+
+        // TODO
     }
 
     void PrintCurrentDB() {
