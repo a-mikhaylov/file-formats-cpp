@@ -16,5 +16,6 @@
 // #include "_libs/_HDF5/hdf5-test.h"   //в последнюю очередь
 
 int main() {
-   MarkupExample();
+   // MarkupExample();
+   LinkTableDuckDB();
 }

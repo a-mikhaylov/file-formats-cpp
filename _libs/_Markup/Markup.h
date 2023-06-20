@@ -12,7 +12,8 @@
 #define DEFAULT_BOOL false
 #define DEFAULT_FLOAT -1.0f
 
-
+// Класс, трансформирующий разметку из csv/bin+toml/json форматов
+// в базу данных duckdb, а также позволяющий работать с ней
 class Markup {
 
     enum Type : int {
@@ -35,17 +36,18 @@ class Markup {
     std::string file_name;  // имя файла с базой данных
     
     int col_count;
-    std::vector<std::string> col_names;
-    std::vector<std::string> col_types_str;
-    std::vector<Type> col_types; 
+    std::vector<std::string> col_names;     //имена колонок
+    std::vector<std::string> col_types_str; //типы колонок в строковом значении
+    std::vector<Type> col_types;    //вектор типов каждого столбца (enum)
 
-    int num = 0;
+    int num = 0;    //порядковый номер записи
 
-    bool isBorder(char c) {
+    //границы колонок в csv-файле
+    inline bool isBorder(char c) {
         return (c == ' ' || c == ';' || c == ',');
     }
-
-    void toType(std::vector<std::string> str_types) {
+    //заполнение вектора col_types, зная названия этих типов (string -> enum)
+    inline void toType(std::vector<std::string> str_types) {
         if (str_types.size() != col_names.size()) {
             std::cerr << "[ERROR]: Incorrect count of types" << std::endl;
             return;
@@ -68,8 +70,8 @@ class Markup {
             }
         }
     }
-
-    std::vector<std::string> Split(std::string str) {
+    //сплит строки по значениям границ (isBorder(c) == true)
+    inline std::vector<std::string> Split(std::string str) {
         std::vector<std::string> res;
         std::string s;
 
@@ -86,8 +88,8 @@ class Markup {
         res.push_back(s);
         return res;
     }
-
-    void AppendSwitch(Type type, std::string value) {
+    //ветвление по типам данных для аппендера. вынесено для удобства
+    inline void AppendSwitch(Type type, std::string value) {
         switch (type)
         {
         case Type::INTEGER:
@@ -119,7 +121,7 @@ class Markup {
         }
     }
 
-    void Init() {
+    inline void Init() {
         col_count = col_names.size();
 
         std::string init_str = "CREATE TABLE " + table_name + 
@@ -156,7 +158,7 @@ public:
             delete appender;
     }
 
-    void Reset() {
+    inline void Reset() {
         if (db != nullptr)
             delete db; 
         db = nullptr;
@@ -176,7 +178,7 @@ public:
     }
 
     //чтение заголовочного файла для создания корректной таблички
-    void InitCSV(std::string _file_name) {
+    inline void InitCSV(std::string _file_name) {
         // Reset();
         col_names.clear();
 
@@ -210,7 +212,7 @@ public:
         Init();
     }
     //копирование информации из csv в базу данных
-    void ParseCSV(std::string _file_name) {
+    inline void ParseCSV(std::string _file_name) {
         csv_fname = _file_name;
 
         std::ifstream csv_in(csv_fname);
@@ -261,7 +263,7 @@ public:
 
     //пока без строковых значений
     template<typename T> 
-    void EditCell(int num, std::string column, T new_value) {
+    inline void EditCell(int num, std::string column, T new_value) {
         con->Query(
             "UPDATE " + table_name + " SET " +
             column + "=" + std::to_string(new_value) + 
@@ -270,7 +272,7 @@ public:
     }
 
     //добавляет одну строчку, используя объект json 
-    void AddRow(nlohmann::json j) {
+    inline void AddRow(nlohmann::json j) {
         appender->BeginRow();
         appender->Append(num++);
         for (int i = 0; i < col_names.size(); ++i) {
@@ -283,16 +285,19 @@ public:
         appender->Flush();
     }
     //добавление всех строк из json-файла
-    void AddJson(std::string fname) {
+    inline void AddJson(std::string fname) {
         nlohmann::json j;
         std::ifstream inp(fname);
         inp >> j;
+
+        if (j.contains("global_intervals"))
+            j = j["global_intervals"];
 
         for (int i = 0; i < j.size(); ++i)
             AddRow(j[i]);
     }
 
-    void DeleteRow(int delete_num) {
+    inline void DeleteRow(int delete_num) {
         if (delete_num < 0 || delete_num > num - 1)
             return;
 
@@ -305,7 +310,7 @@ public:
         --num;
     }
 
-    void DeleteRow(int delete_start, int delete_end) {
+    inline void DeleteRow(int delete_start, int delete_end) {
         if (delete_end < delete_start)
             return;
 
@@ -313,7 +318,7 @@ public:
             DeleteRow(i);
     }
     //вставка строки на нужную позицию
-    void InsertRow(int pos, nlohmann::json j) {
+    inline void InsertRow(int pos, nlohmann::json j) {
         if (pos < 0)
             pos = 0;
 
@@ -325,7 +330,7 @@ public:
         // TODO
     }
 
-    void PrintCurrentDB() {
+    inline void PrintCurrentDB() {
         std::unique_ptr<duckdb::MaterializedQueryResult> result = 
             con->Query("SELECT * FROM " + table_name);
         std::cerr << result->ToString() << std::endl
